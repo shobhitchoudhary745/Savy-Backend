@@ -63,6 +63,6 @@ exports.register = catchAsyncError(async (req, res, next) => {
   
   </div>`,
   };
-  await sendEmail(options);
+ // await sendEmail(options);
   sendData(user, 201, res, "register");
 });
