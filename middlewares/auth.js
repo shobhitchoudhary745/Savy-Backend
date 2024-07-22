@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
-const User = require("../@user_entity/user.model");
+const User = require("../models/userModel");
 const dotenv = require("dotenv");
 const ErrorHandler = require("../utils/errorHandler");
-const orderModel = require("../@order_entity/order.model");
+
 dotenv.config({ path: "../config/config.env" });
 
 exports.auth = async (req, res, next) => {
@@ -43,7 +43,10 @@ exports.getNewAccesstoken = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: `Something went Wrong` });
     }
-    const order = await orderModel.findOne({user:user._id,status:"Active"});
+    const order = await orderModel.findOne({
+      user: user._id,
+      status: "Active",
+    });
     if (order) {
       if (!user.device_ids.includes(req.headers.authorization.split(" ")[1])) {
         return next(

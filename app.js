@@ -4,7 +4,6 @@ const app = express();
 const { error } = require("./middlewares/error");
 const dotenv = require("dotenv");
 
-
 dotenv.config({
   path: "./config/config.env",
 });
@@ -19,16 +18,9 @@ app.use(
   })
 );
 
-// import routes
-// const userRoutes = require("./routes/user.routes.js");
+const userRoutes = require("./routes/userRoutes");
 
-
-//import validators
-// const userValidator = require("./validators/user.validator.js");
-
-
-// use routes
-// app.use("/api/user", userValidator, userRoutes);
+app.use("/api/user", userRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)

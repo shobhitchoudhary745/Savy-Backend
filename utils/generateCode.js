@@ -1,11 +1,7 @@
-exports.generateCode = () => {
-  let code = "";
-  const numbers = "0123456789";
-  const numberLength = numbers.length;
+exports.generateOtp = () => {
+  const min = 1000;
+  const max = 9999;
+  const otp = Math.floor(Math.random() * (max - min + 1)) + min;
 
-  for (let i = 0; i < 5; i++) {
-    code += numbers.charAt(Math.floor(Math.random() * numberLength));
-  }
-
-  return code;
+  return otp;
 };
