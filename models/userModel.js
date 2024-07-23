@@ -12,12 +12,15 @@ const Schema = new mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
     },
-    mpin: {
-      type: Number,
+    code: {
+      type: String,
     },
     profile_url: {
       type: String,
