@@ -1,9 +1,12 @@
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
+const axios = require("axios");
+const API_KEY = process.env.BASIC_API;
 
 const userModel = require("../models/userModel");
 const { generateOtp } = require("../utils/generateCode");
 const { sendEmail } = require("../utils/sendEmail");
+const getToken = require("../utils/getToken");
 
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
@@ -212,4 +215,159 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
       message: "Invalid otp!",
     });
   }
+});
+
+exports.createBasiqUser = catchAsyncError(async (req, res, next) => {
+  const { mobile } = req.body;
+  const token = await getToken();
+
+  const { data } = await axios.post(
+    `${process.env.BASE_URL}/users`,
+    { mobile },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  // const consent = await axios.get(
+  //   `${process.env.BASE_URL}/users/${data.id}/consents`,
+  //   {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //       Accept: "application/json",
+  //     },
+  //   }
+  // );
+  const { data: data2 } = await axios.post(
+    `${process.env.BASE_URL}/users/${data.id}/auth_link`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  console.log(data2);
+  res.status(201).send({
+    success: true,
+    data2,
+  });
+});
+
+exports.getUserConcent = catchAsyncError(async (req, res, next) => {
+  // const { user_id } = req.query;
+  const token = await getToken();
+
+  res.status(201).send({
+    success: true,
+    data,
+  });
+});
+
+exports.getConnection = catchAsyncError(async (req, res, next) => {
+  // const { user_id } = req.query;
+  const token = await getToken();
+  const { data } = await axios.get(
+    `${process.env.BASE_URL}/users/72700687-0cb8-42ad-a94e-e7111740b4eb/connections`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  res.status(201).send({
+    success: true,
+    data,
+    token,
+  });
+});
+
+exports.getUserToken = catchAsyncError(async (req, res, next) => {
+  try {
+    const getTokenConfig = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://au-api.basiq.io/token",
+      headers: {
+        Authorization: `Basic ${API_KEY}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "basiq-version": "3.0",
+      },
+      data: new URLSearchParams({
+        grant_type: "client_credentials",
+      }).toString(),
+    };
+
+    const tokenResponse = await axios(getTokenConfig);
+    const appAccessToken = tokenResponse.data.access_token;
+    console.log("step 1) success");
+
+    // Step 2: Create a user (assuming user creation is required)
+    const createUserConfig = {
+      method: "post",
+      url: "https://au-api.basiq.io/users",
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+        "Content-Type": "application/json",
+        "basiq-version": "3.0",
+      },
+      data: JSON.stringify({ mobile: "+611300895996" }),
+    };
+
+    const userResponse = await axios(createUserConfig);
+    const userId = userResponse.data.id;
+    console.log("step 2) success", userId);
+
+    const getUserConfig = {
+      method: "get",
+      url: `https://au-api.basiq.io/users/${userId}`,
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+        "basiq-version": "3.0",
+      },
+    };
+
+    const { data } = await axios(getUserConfig);
+    console.log(data);
+    res.status(200).send({ data });
+  } catch (error) {
+    console.error(
+      "Error in process:",
+      error.response ? error.response.data : error.message
+    );
+  }
+});
+
+exports.getUserBanks = catchAsyncError(async (req, res, next) => {
+  // const { user_id } = req.query;
+  const token = await getToken();
+  const { data } = await axios.get(`${process.env.BASE_URL}/customers`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      filter: `loginId:Betty Nowak`,
+    },
+  });
+  // const { data } = await axios.get(
+  //   `${process.env.BASE_URL}/users/${user_id}/accounts`,
+  //   {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //       Accept: "application/json",
+  //     },
+  //   }
+  // );
+  res.status(201).send({
+    success: true,
+    data,
+  });
 });

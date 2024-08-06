@@ -6,6 +6,11 @@ const {
   getOtpToForgotPassword,
   resetPassword,
   submitOtpToForgotPassword,
+  createBasiqUser,
+  getUserBanks,
+  getUserConcent,
+  getConnection,
+  getUserToken,
 } = require("../controllers/userController");
 const { upload } = require("../utils/s3");
 const router = express.Router();
@@ -15,5 +20,10 @@ router.post("/login", login);
 router.post("/getotp-to-forgot-password", getOtpToForgotPassword);
 router.post("/submitotp-to-forgot-password", submitOtpToForgotPassword);
 router.post("/reset-password", resetPassword);
+router.post("/create-basiq-user", createBasiqUser);
+router.get("/get-user-consent", getUserConcent);
+router.get("/get-user-connection", getConnection);
+router.get("/get-user-account", getUserBanks);
+router.post("/get-user-token", getUserToken);
 
 module.exports = router;

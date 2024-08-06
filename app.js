@@ -19,8 +19,10 @@ app.use(
 );
 
 const userRoutes = require("./routes/userRoutes");
+const bankRoutes = require("./routes/bankRoutes");
 
 app.use("/api/user", userRoutes);
+app.use("/api/bank", bankRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
