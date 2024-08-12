@@ -29,6 +29,7 @@ const bankRoutes = require("./routes/bankRoutes");
 const queryRoutes = require("./routes/queryRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
+const faqRoutes = require("./routes/faqRoutes");
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
@@ -36,6 +37,7 @@ app.use("/api/bank", bankRoutes);
 app.use("/api/query", queryRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api/testimonial", testimonialRoutes);
+app.use("/api/faq", faqRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
