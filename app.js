@@ -3,10 +3,15 @@ const cors = require("cors");
 const app = express();
 const { error } = require("./middlewares/error");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
+const helmet = require("helmet");
 
 dotenv.config({
   path: "./config/config.env",
 });
+
+app.use(helmet());
+app.use(morgan("tiny"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -18,11 +23,17 @@ app.use(
   })
 );
 
+const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bankRoutes = require("./routes/bankRoutes");
+const queryRoutes = require("./routes/queryRoutes");
+const blogRoutes = require("./routes/blogRoutes");
 
+app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/bank", bankRoutes);
+app.use("/api/query", queryRoutes);
+app.use("/api/blog", blogRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)

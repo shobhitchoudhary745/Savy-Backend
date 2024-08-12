@@ -2,11 +2,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const dotenv = require("dotenv");
 const ErrorHandler = require("../utils/errorHandler");
+const adminModel = require("../models/adminModel");
 
 dotenv.config({ path: "../config/config.env" });
 
 exports.auth = async (req, res, next) => {
   try {
+    console.log(req.headers.authorization);
     if (!req.headers.authorization) {
       return res.status(401).json({ message: `Authentication Expired` });
     }
@@ -17,11 +19,6 @@ exports.auth = async (req, res, next) => {
     );
 
     req.userId = userId;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(401).json({ message: `Something went Wrong` });
-    }
     next();
   } catch (error) {
     return res
@@ -77,16 +74,11 @@ exports.getNewAccesstoken = async (req, res, next) => {
 
 exports.isAdmin = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId).select("+password");
+    const user = await adminModel.findById(req.userId).select("+password");
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
 
-    if (user.role !== "admin") {
-      return res.status(401).json({ message: "Forbidden:Admin Only" });
-    }
-
-    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized:Admin Only" });
