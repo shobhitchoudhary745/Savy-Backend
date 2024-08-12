@@ -60,6 +60,7 @@ exports.updateBlog = catchAsyncError(async (req, res, next) => {
   if (title) blog.title = title;
   if (description) blog.description = description;
   if (location) blog.image_url = location;
+  await blog.save();
 
   res.status(200).json({
     success: true,

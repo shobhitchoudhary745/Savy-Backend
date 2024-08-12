@@ -8,7 +8,7 @@ dotenv.config({ path: "../config/config.env" });
 
 exports.auth = async (req, res, next) => {
   try {
-    console.log(req.headers.authorization);
+    // console.log(req.headers.authorization);
     if (!req.headers.authorization) {
       return res.status(401).json({ message: `Authentication Expired` });
     }
