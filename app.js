@@ -30,6 +30,7 @@ const queryRoutes = require("./routes/queryRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
 const faqRoutes = require("./routes/faqRoutes");
+const bucketRoutes = require("./routes/bucketRoutes");
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
@@ -38,6 +39,7 @@ app.use("/api/query", queryRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api/testimonial", testimonialRoutes);
 app.use("/api/faq", faqRoutes);
+app.use("/api/bucket", bucketRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
