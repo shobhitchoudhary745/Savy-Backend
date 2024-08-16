@@ -20,7 +20,7 @@ exports.createCategory = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCategorys = catchAsyncError(async (req, res, next) => {
-  const categorys = await categoryModel.find().lean();
+  const categorys = await categoryModel.find().sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     categorys,

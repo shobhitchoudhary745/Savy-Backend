@@ -19,7 +19,7 @@ exports.createBucket = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBuckets = catchAsyncError(async (req, res, next) => {
-  const buckets = await bucketModel.find().lean();
+  const buckets = await bucketModel.find().sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     buckets,

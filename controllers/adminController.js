@@ -1,4 +1,11 @@
 const adminModel = require("../models/adminModel");
+const blogsModel = require("../models/blogsModel");
+const bucketModel = require("../models/bucketModel");
+const categoryModel = require("../models/categoryModel");
+const faqModel = require("../models/faqModel");
+const queryModel = require("../models/queryModel");
+const testimonialModel = require("../models/testimonialModel");
+const userModel = require("../models/userModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const { sendEmail } = require("../utils/sendEmail");
@@ -124,4 +131,31 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
       message: "Invalid otp!",
     });
   }
+});
+
+exports.getDashboardData = catchAsyncError(async (req, res, next) => {
+  const [Blogs, Faqs, Testimonials, Users, Querys, Buckets, Categorys] =
+    await Promise.all([
+      blogsModel.countDocuments(),
+      faqModel.countDocuments(),
+      testimonialModel.countDocuments(),
+      userModel.countDocuments(),
+      queryModel.countDocuments(),
+      bucketModel.countDocuments(),
+      categoryModel.countDocuments(),
+    ]);
+
+  res.status(200).send({
+    success: true,
+    message: "Dashboard data Fetched Successfully",
+    data: [
+      { Blogs },
+      { Faqs },
+      { Testimonials },
+      { Users },
+      { Querys },
+      { Buckets },
+      { Categorys },
+    ],
+  });
 });

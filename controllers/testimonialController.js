@@ -29,7 +29,7 @@ exports.createTestimonial = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getTestimonials = catchAsyncError(async (req, res, next) => {
-  const testimonials = await testimonialModel.find().lean();
+  const testimonials = await testimonialModel.find().sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     testimonials,

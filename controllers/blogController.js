@@ -28,7 +28,7 @@ exports.createBlog = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBlogs = catchAsyncError(async (req, res, next) => {
-  const blogs = await blogModel.find().lean();
+  const blogs = await blogModel.find().sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     blogs,

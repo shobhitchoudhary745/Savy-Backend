@@ -20,7 +20,7 @@ exports.createFaq = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getFaqs = catchAsyncError(async (req, res, next) => {
-  const faqs = await faqModel.find().lean();
+  const faqs = await faqModel.find().sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     faqs,

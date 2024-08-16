@@ -21,7 +21,7 @@ exports.createQuery = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getQuerys = catchAsyncError(async (req, res, next) => {
-  const querys = await queryModel.find().lean();
+  const querys = await queryModel.find().sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     querys,
