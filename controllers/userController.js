@@ -119,7 +119,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
   // await sendEmail(options);
   res.status(201).send({
     success: true,
-    data2,
+    data:data2,
   });
 });
 
