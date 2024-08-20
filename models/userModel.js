@@ -22,6 +22,9 @@ const Schema = new mongoose.Schema(
     code: {
       type: String,
     },
+    mobile: {
+      type: String,
+    },
     profile_url: {
       type: String,
       default: "/test/1717483821163-user.jfif",
@@ -32,6 +35,9 @@ const Schema = new mongoose.Schema(
     is_verified: {
       type: Boolean,
       default: false,
+    },
+    customer_id: {
+      type: String,
     },
   },
 
