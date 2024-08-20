@@ -65,7 +65,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
 
   const { data } = await axios.post(
     `${process.env.BASE_URL}/users`,
-    { mobile },
+    { mobile_no },
     {
       headers: {
         Authorization: `Bearer ${token}`,
