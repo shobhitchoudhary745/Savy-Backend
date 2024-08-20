@@ -41,7 +41,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     req.body;
   // const otp = generateOtp();
   const existingUser = await userModel.findOne({
-    $or: [{ email }, { mobile_no }],
+    email,
   });
   if (existingUser)
     return next(new ErrorHandler("User Already Exist with this email", 400));
