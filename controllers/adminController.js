@@ -159,3 +159,20 @@ exports.getDashboardData = catchAsyncError(async (req, res, next) => {
     ],
   });
 });
+
+exports.updatePassword = catchAsyncError(async (req, res, next) => {
+  const { current_password, new_password, confirm_password } = req.body;
+  if (new_password != confirm_password)
+    return next(
+      new ErrorHandler("New Password is not match with Confirm Password", 400)
+    );
+  const admin = await adminModel.findById(req.userId);
+  if (!admin) {
+    return next(new ErrorHandler("Admin not found", 400));
+  }
+  const isMatch = await admin.matchPassword(current_password);
+  if (!isMatch)
+    return next(new ErrorHandler("Current Password is Wrong", 400));
+  admin.password = new_password;
+  await admin.save();
+});
