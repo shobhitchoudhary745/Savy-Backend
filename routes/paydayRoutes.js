@@ -11,8 +11,8 @@ const {
 
 const router = express.Router();
 router.post("/create-payday", auth, createPayday);
-router.get("/get-paydays", getPaydays);
-router.get("/get-payday/:id", getPayday);
+router.get("/get-paydays", auth, getPaydays);
+router.get("/get-payday/:id", auth, getPayday);
 router.patch("/update-payday/:id", auth, updatePayday);
 router.delete("/delete-payday/:id", auth, deletePayday);
 
