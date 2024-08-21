@@ -22,7 +22,7 @@ exports.createBill = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBills = catchAsyncError(async (req, res, next) => {
-  const bills = await billModel.find().sort({ createdAt: -1 }).lean();
+  const bills = await billModel.find({user:req.userId}).sort({ createdAt: -1 }).lean();
   res.status(200).json({
     success: true,
     bills,
