@@ -6,10 +6,14 @@ const schema = new mongoose.Schema(
       type: Date,
     },
     pay_period: {
-      type: String,
+      type: Number,
     },
     amount: {
       type: Number,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {
