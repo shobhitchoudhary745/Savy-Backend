@@ -1,6 +1,7 @@
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const bucketModel = require("../models/bucketModel");
+const categoryModel = require("../models/categoryModel");
 
 exports.createBucket = catchAsyncError(async (req, res, next) => {
   const { name } = req.body;
@@ -59,5 +60,18 @@ exports.deleteBucket = catchAsyncError(async (req, res, next) => {
     success: true,
     bucket,
     message: "Bucket deleted Successfully",
+  });
+});
+
+exports.getBucketList = catchAsyncError(async (req, res, next) => {
+  const buckets = await bucketModel.find({}, { name: 1}).lean();
+  for (const bucket of buckets) {
+    const categories = await categoryModel.find({ bucket: bucket._id });
+    bucket.categories = categories;
+  }
+  res.status(200).json({
+    success: true,
+    buckets,
+    message: "Bucket List Fetched Successfully",
   });
 });

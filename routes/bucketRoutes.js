@@ -7,6 +7,7 @@ const {
   getBucket,
   updateBucket,
   deleteBucket,
+  getBucketList,
 } = require("../controllers/bucketController");
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get("/get-buckets", getBuckets);
 router.get("/get-bucket/:id", getBucket);
 router.patch("/update-bucket/:id", auth, isAdmin, updateBucket);
 router.delete("/delete-bucket/:id", auth, isAdmin, deleteBucket);
+router.get("/get-bucket-list", auth, isAdmin, getBucketList);
 
 module.exports = router;
