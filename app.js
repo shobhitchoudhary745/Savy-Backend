@@ -35,6 +35,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const paydayRoutes = require("./routes/paydayRoutes");
 const billRoutes = require("./routes/billRoutes");
 const budgetRoutes = require("./routes/budgetRoutes");
+const goalRoutes = require("./routes/goalRoutes");
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
@@ -48,6 +49,7 @@ app.use("/api/category", categoryRoutes);
 app.use("/api/payday", paydayRoutes);
 app.use("/api/bill", billRoutes);
 app.use("/api/budget", budgetRoutes);
+app.use("/api/goal", goalRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)

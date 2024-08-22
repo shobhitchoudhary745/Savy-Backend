@@ -2,14 +2,17 @@ const mongoose = require("mongoose");
 
 const Schema = new mongoose.Schema(
   {
-    pay_date: {
-      type: Date,
-    },
-    pay_period: {
-      type: Number,
+    description: {
+      type: String,
     },
     amount: {
       type: Number,
+    },
+    date: {
+      type: Date,
+    },
+    image: {
+      type: String,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,4 +24,4 @@ const Schema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Payday", Schema);
+module.exports = mongoose.model("Goal", Schema);

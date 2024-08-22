@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const schema = new mongoose.Schema(
+const Schema = new mongoose.Schema(
   {
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,4 +23,4 @@ const schema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Bill", schema);
+module.exports = mongoose.model("Bill", Schema);
