@@ -11,6 +11,9 @@ const Schema = new mongoose.Schema(
     amount: {
       type: Number,
     },
+    source: {
+      type: String,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
