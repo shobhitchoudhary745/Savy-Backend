@@ -2,7 +2,7 @@ const planModel = require("../models/planModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 
-exports.createPlan = catchAsyncError(async (req, res) => {
+exports.createPlan = catchAsyncError(async (req, res, next) => {
   const {
     plan_name,
     tag_line,
