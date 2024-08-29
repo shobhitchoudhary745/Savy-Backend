@@ -7,6 +7,7 @@ const userModel = require("../models/userModel");
 const { generateOtp } = require("../utils/generateCode");
 const { sendEmail } = require("../utils/sendEmail");
 const getToken = require("../utils/getToken");
+const months = require("../utils/helper");
 
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
@@ -65,7 +66,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
 
   const { data } = await axios.post(
     `${process.env.BASE_URL}/users`,
-    { mobile:mobile_no },
+    { mobile: mobile_no },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -74,7 +75,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
       },
     }
   );
-  console.log(data) 
+  console.log(data);
   // return;
 
   const { data: data2 } = await axios.post(
@@ -119,7 +120,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
   // await sendEmail(options);
   res.status(201).send({
     success: true,
-    data:data2,
+    data: data2,
   });
 });
 
@@ -406,5 +407,97 @@ exports.getUserBanks = catchAsyncError(async (req, res, next) => {
   res.status(201).send({
     success: true,
     data,
+  });
+});
+
+exports.getGraphData = catchAsyncError(async (req, res, next) => {
+  const user = await userModel.findById(req.userId);
+  const token = await getToken();
+  const currentYear = new Date().getFullYear();
+  const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+  const { data: account } = await await axios.get(
+    `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (account.data.length == 0)
+    return res.status(200).json({ success: true, message: "No data is found" });
+  const userName = account.data[0].accountHolder;
+  const totalAmount = account.data[0].balance;
+  const creditCard = account.data[0].creditLimit || 0;
+  const monthlyMoneyOut = Array(12).fill(0);
+  const monthlyMoneyIn = Array(12).fill(0);
+  const { data: transactions } = await axios.get(
+    `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  let moneyIn = 0,
+    moneyOut = 0;
+
+  for (const transaction of transactions.data) {
+    if (transaction.direction == "credit") {
+      moneyIn += Number(transaction.amount);
+    } else moneyOut += Number(transaction.amount);
+    if (
+      new Date(transaction.postDate) >= yearStart &&
+      transaction.direction != "credit"
+    ) {
+      const month = new Date(transaction.postDate).getMonth();
+      monthlyMoneyOut[month] += Number(transaction.amount);
+    }
+    if (
+      new Date(transaction.postDate) >= yearStart &&
+      transaction.direction == "credit"
+    ) {
+      const month = new Date(transaction.postDate).getMonth();
+      monthlyMoneyIn[month] += Number(transaction.amount);
+    }
+  }
+
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const graphData = monthlyMoneyOut.map((count, index) => ({
+    month: months[index],
+    count,
+  }));
+  const graphData2 = monthlyMoneyIn.map((count, index) => ({
+    month: months[index],
+    count,
+  }));
+  res.status(200).send({
+    success: true,
+    userName,
+    card1: {
+      "Total amount": totalAmount,
+      "Credit Card": creditCard,
+      moneyIn,
+      moneyOut,
+      monthlyMoneyOut: graphData,
+    },
+    card2: {
+      monthlyMoneyIn: graphData2,
+    },
+    transactions: transactions.data.slice(0, 5),
+    messaage: "Account Fetched Successfully",
   });
 });

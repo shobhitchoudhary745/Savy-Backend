@@ -11,6 +11,7 @@ const {
   getUserConcent,
   getConnection,
   getUserToken,
+  getGraphData,
 } = require("../controllers/userController");
 const { upload } = require("../utils/s3");
 const router = express.Router();
@@ -25,5 +26,6 @@ router.get("/get-user-consent", getUserConcent);
 router.get("/get-user-connection", getConnection);
 router.get("/get-user-account", getUserBanks);
 router.post("/get-user-token", getUserToken);
+router.get("/get-graph-data", auth, getGraphData);
 
 module.exports = router;
