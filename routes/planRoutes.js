@@ -14,7 +14,7 @@ router
   .post("/create-plan", auth, isAdmin, createPlan)
   .get("/get-plans", getAllPlans)
   .get("/get-plan/:id", getPlan)
-  .patch("/update-plan/:id", auth, isAdmin, updatePlan)
-  .delete("/delete-plan", deletePlan);
+  .patch("/update-plan/:id", auth, isAdmin, updatePlan);
+router.delete("/delete-plan/:id", auth, isAdmin, deletePlan);
 
 module.exports = router;

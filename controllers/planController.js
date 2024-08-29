@@ -57,7 +57,7 @@ exports.getPlan = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     plan,
-    message: "Plan Fsetched Successfully",
+    message: "Plan Fetched Successfully",
   });
 });
 
