@@ -486,20 +486,22 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   }));
   res.status(200).send({
     success: true,
-    userName,
-    card1: {
-      "Total amount": totalAmount,
-      "Credit Card": creditCard,
-      moneyInVsMoneyOut: [
-        { name: "Money In", uv: moneyIn },
-        { name: "Money Out", uv: moneyOut },
-      ],
-      monthlyMoneyOut: graphData,
+    dashboardData: {
+      userName,
+      card1: {
+        "Total amount": totalAmount,
+        "Credit Card": creditCard,
+        moneyInVsMoneyOut: [
+          { name: "Money In", uv: moneyIn },
+          { name: "Money Out", uv: moneyOut },
+        ],
+        monthlyMoneyOut: graphData,
+      },
+      card2: {
+        monthlyMoneyIn: graphData2,
+      },
+      transactions: transactions.data.slice(0, 5),
     },
-    card2: {
-      monthlyMoneyIn: graphData2,
-    },
-    transactions: transactions.data.slice(0, 5),
     messaage: "Account Fetched Successfully",
   });
 });
