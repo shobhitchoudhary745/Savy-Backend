@@ -477,12 +477,12 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   ];
 
   const graphData = monthlyMoneyOut.map((count, index) => ({
-    month: months[index],
-    count,
+    name: months[index],
+    uv: count,
   }));
   const graphData2 = monthlyMoneyIn.map((count, index) => ({
-    month: months[index],
-    count,
+    name: months[index],
+    uv: count,
   }));
   res.status(200).send({
     success: true,
@@ -490,8 +490,10 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
     card1: {
       "Total amount": totalAmount,
       "Credit Card": creditCard,
-      moneyIn,
-      moneyOut,
+      moneyInVsMoneyOut: [
+        { name: "Money In", uv: moneyIn },
+        { name: "Money Out", uv: moneyOut },
+      ],
       monthlyMoneyOut: graphData,
     },
     card2: {
