@@ -500,7 +500,19 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       card2: {
         monthlyMoneyIn: graphData2,
       },
-      transactions: transactions.data.slice(0, 5),
+      transactions: transactions.data
+        .map((trans) => {
+          return {
+            description: trans.description,
+            amount:
+              trans.direction === "credit"
+                ? Number(trans.amount)
+                : Number(trans.amount) * -1,
+            time: trans.postDate,
+          };
+        })
+        .reverse()
+        .slice(0, 5),
     },
     messaage: "Account Fetched Successfully",
   });
