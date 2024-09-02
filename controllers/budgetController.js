@@ -4,8 +4,8 @@ const budgetModel = require("../models/budgetModel");
 const billModel = require("../models/billModel");
 
 exports.createBudget = catchAsyncError(async (req, res, next) => {
-  const { category, budget, budget_amount, is_bill } = req.body;
-  if (!category || !budget || !budget_amount) {
+  const { category, budget_amount, is_bill } = req.body;
+  if (!category || !budget_amount) {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
 
@@ -17,7 +17,7 @@ exports.createBudget = catchAsyncError(async (req, res, next) => {
     is_bill,
   });
   if (is_bill) {
-    await billModel.create({ category, budget, budget_amount });
+    await billModel.create({ category, budget: budget1._id, budget_amount });
   }
   res.status(201).json({
     success: true,
