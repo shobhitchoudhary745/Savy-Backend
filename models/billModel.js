@@ -9,9 +9,9 @@ const Schema = new mongoose.Schema(
     budget_amount: {
       type: Number,
     },
-    payday: {
+    budget: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Payday",
+      ref: "Budget",
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

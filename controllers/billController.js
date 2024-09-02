@@ -3,14 +3,14 @@ const ErrorHandler = require("../utils/errorHandler");
 const billModel = require("../models/billModel");
 
 exports.createBill = catchAsyncError(async (req, res, next) => {
-  const { category, payday, budget_amount } = req.body;
-  if (!category || !payday || !budget_amount) {
+  const { category, budget, budget_amount } = req.body;
+  if (!category || !budget || !budget_amount) {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
 
   const bill = await billModel.create({
     category,
-    payday,
+    budget,
     budget_amount,
     user: req.userId,
   });
@@ -43,9 +43,9 @@ exports.getBill = catchAsyncError(async (req, res, next) => {
 exports.updateBill = catchAsyncError(async (req, res, next) => {
   const bill = await billModel.findById(req.params.id);
   if (!bill) return next(new ErrorHandler("Payday Not Found", 404));
-  const { category, payday, budget_amount } = req.body;
+  const { category, budget, budget_amount } = req.body;
   if (category) bill.category = category;
-  if (payday) bill.payday = payday;
+  if (budget) bill.budget = budget;
   if (budget_amount) bill.budget_amount = budget_amount;
   await bill.save();
 
