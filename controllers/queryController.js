@@ -16,7 +16,7 @@ exports.createQuery = catchAsyncError(async (req, res, next) => {
   res.status(201).json({
     success: true,
     query,
-    message: "Query Created Successfully",
+    message: "Query Submitted Successfully",
   });
 });
 
