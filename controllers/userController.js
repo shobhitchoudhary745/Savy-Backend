@@ -516,3 +516,130 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
     messaage: "Account Fetched Successfully",
   });
 });
+
+exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
+  const user = await userModel.findById(req.userId);
+  const token = await getToken();
+  const currentYear = new Date().getFullYear();
+  const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+  const { data: account } = await await axios.get(
+    `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (account.data.length == 0)
+    return res.status(200).json({ success: true, message: "No data is found" });
+
+  const { data: transactions } = await axios.get(
+    `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const monthlyMoneyOut = Array(12).fill(0);
+  const monthlyMoneyIn = Array(12).fill(0);
+  for (const transaction of transactions.data) {
+    if (
+      new Date(transaction.postDate) >= yearStart &&
+      transaction.direction != "credit"
+    ) {
+      const month = new Date(transaction.postDate).getMonth();
+      monthlyMoneyOut[month] += Number(transaction.amount);
+    }
+    if (
+      new Date(transaction.postDate) >= yearStart &&
+      transaction.direction == "credit"
+    ) {
+      const month = new Date(transaction.postDate).getMonth();
+      monthlyMoneyIn[month] += Number(transaction.amount);
+    }
+  }
+
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const graphData = monthlyMoneyOut.map((count, index) => ({
+    name: months[index],
+    uv: count * -1,
+  }));
+  const graphData2 = monthlyMoneyIn.map((count, index) => ({
+    name: months[index],
+    uv: count,
+  }));
+
+  const date = new Date();
+  const currentMonth = date.getMonth();
+
+  const data = {};
+  data.moneyIn = {
+    graphData: [
+      { name: "Previous Month", uv: graphData2[currentMonth - 1].uv },
+      { name: "Current Month", uv: graphData2[currentMonth].uv },
+    ],
+    percent:
+      graphData2[currentMonth - 1].uv > graphData2[currentMonth].uv
+        ? (((graphData2[currentMonth - 1].uv - graphData2[currentMonth].uv) *
+            100) /
+            graphData2[currentMonth - 1].uv) *
+          -1
+        : ((graphData2[currentMonth].uv - graphData2[currentMonth - 1].uv) *
+            100) /
+          graphData2[currentMonth - 1].uv,
+  };
+
+  data.moneyOut = {
+    graphData: [
+      { name: "Previous Month", uv: graphData[currentMonth - 1].uv },
+      { name: "Current Month", uv: graphData[currentMonth].uv },
+    ],
+    percent:
+      graphData[currentMonth - 1].uv > graphData[currentMonth].uv
+        ? ((graphData[currentMonth - 1].uv - graphData[currentMonth].uv) *
+            100) /
+          graphData[currentMonth - 1].uv
+        : (((graphData[currentMonth].uv - graphData[currentMonth - 1].uv) *
+            100) /
+            graphData[currentMonth - 1].uv) *
+          -1,
+  };
+
+  data.largeTransaction = transactions.data.sort(
+    (a, b) => Number(b.amount) - Number(a.amount)
+  );
+
+  data.largeTransaction = data.largeTransaction.map((trans) => {
+    return {
+      description: trans.description,
+      amount:
+        trans.direction == "debit"
+          ? ((Number(trans.amount))*-1)
+          : Number(trans.amount) ,
+      time: trans.postDate,
+      direction: trans.direction,
+    };
+  }).slice(0,5);
+
+  res.status(200).send({
+    success: true,
+    cashFlowData: data,
+    messaage: "Cash Flow Data Fetched Successfully",
+  });
+});
