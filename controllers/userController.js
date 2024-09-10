@@ -80,7 +80,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
 
   const { data: data2 } = await axios.post(
     `${process.env.BASE_URL}/users/${data.id}/auth_link`,
-    {},
+    {redirectUrl:"https://www.stringgeo.com"},
     {
       headers: {
         Authorization: `Bearer ${token}`,
