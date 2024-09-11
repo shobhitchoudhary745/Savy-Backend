@@ -39,6 +39,7 @@ const budgetRoutes = require("./routes/budgetRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const planRoutes = require("./routes/planRoutes");
 const pageRoutes = require("./routes/pageRoutes");
+const userModel = require("./models/userModel");
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
@@ -61,26 +62,21 @@ app.get("/", (req, res) =>
 );
 
 app.post("/consent-form", async (req, res) => {
-  try {
-    const transporter = nodeMailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: true,
-      auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
+  const event = req.body;
 
-    await transporter.sendMail({
-      from: "Keep It Going <keepitgoingstory@gmail.com>",
-      to: "shobhitchoudhary745@gmail.com",
-      subject: "Consent Form",
-      text: JSON.stringify(req.body),
-    });
-    res.status(200).json({});
-  } catch (error) {
-    res.status(400).json({});
+  if (event.eventTypeId === "consent.created") {
+    try {
+      const url = event.eventEntity;
+      const parts = url.split("/");
+      const userId = parts[4];
+      const user = await userModel.findOne({ customer_id: userId });
+      user.is_verified = true;
+      await user.save();
+      res.redirect("https://www.stringgeo.com");
+      res.status(200).json({});
+    } catch (error) {
+      res.status(400).json({});
+    }
   }
 });
 
@@ -94,3 +90,14 @@ app.all("*", (req, res, next) => {
 module.exports = app;
 
 app.use(error);
+
+var obj = {
+  eventId: "d6b1e55d1f1ca7f1ee79a997ab79ee3625467dddb9911159b81caadd2af1b916",
+  eventTypeId: "consent.created",
+  links: {
+    event:
+      "https://au-api.basiq.io/events/d6b1e55d1f1ca7f1ee79a997ab79ee3625467dddb9911159b81caadd2af1b916",
+    eventEntity:
+      "https://au-api.basiq.io/users/aa59466e-bd3d-49b6-90f0-9253db6dc381/consents/2cc7bfcc-ade6-485a-92c3-c095f354466e",
+  },
+};

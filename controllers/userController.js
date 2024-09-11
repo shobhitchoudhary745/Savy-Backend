@@ -80,7 +80,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
 
   const { data: data2 } = await axios.post(
     `${process.env.BASE_URL}/users/${data.id}/auth_link`,
-    {redirectUrl:"https://www.stringgeo.com"},
+    { redirectUrl: "https://www.stringgeo.com" },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -95,7 +95,6 @@ exports.register = catchAsyncError(async (req, res, next) => {
     password,
     code,
     mobile_no,
-    is_verified: true,
     customer_id: data.id,
   });
 
@@ -132,7 +131,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please enter Password or code", 400));
 
   const user = await userModel
-    .findOne({ email: email.toLowerCase() })
+    .findOne({ email: email.toLowerCase(), is_verified: true })
     .select("+password");
   if (!user) {
     return next(new ErrorHandler("Invalid email or password", 401));
@@ -625,17 +624,19 @@ exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
     (a, b) => Number(b.amount) - Number(a.amount)
   );
 
-  data.largeTransaction = data.largeTransaction.map((trans) => {
-    return {
-      description: trans.description,
-      amount:
-        trans.direction == "debit"
-          ? ((Number(trans.amount))*-1)
-          : Number(trans.amount) ,
-      time: trans.postDate,
-      direction: trans.direction,
-    };
-  }).slice(0,5);
+  data.largeTransaction = data.largeTransaction
+    .map((trans) => {
+      return {
+        description: trans.description,
+        amount:
+          trans.direction == "debit"
+            ? Number(trans.amount) * -1
+            : Number(trans.amount),
+        time: trans.postDate,
+        direction: trans.direction,
+      };
+    })
+    .slice(0, 5);
 
   res.status(200).send({
     success: true,
