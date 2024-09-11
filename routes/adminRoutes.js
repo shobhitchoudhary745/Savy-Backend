@@ -19,6 +19,6 @@ router.post("/submit-otp", submitOtp);
 router.post("/reset-password", resetPassword);
 router.get("/get-dashboard-data", auth, isAdmin, getDashboardData);
 router.patch("/update-password", auth, updatePassword);
-router.patch("/get-all-users", auth, isAdmin, getAllUser);
+router.get("/get-all-users", auth, isAdmin, getAllUser);
 
 module.exports = router;
