@@ -39,6 +39,7 @@ const budgetRoutes = require("./routes/budgetRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const planRoutes = require("./routes/planRoutes");
 const pageRoutes = require("./routes/pageRoutes");
+const tagRoutes = require("./routes/tagRoutes");
 const userModel = require("./models/userModel");
 
 app.use("/api/admin", adminRoutes);
@@ -56,6 +57,7 @@ app.use("/api/budget", budgetRoutes);
 app.use("/api/goal", goalRoutes);
 app.use("/api/plan", planRoutes);
 app.use("/api/page", pageRoutes);
+app.use("/api/tag", tagRoutes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
