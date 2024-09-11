@@ -45,11 +45,14 @@ exports.getTag = catchAsyncError(async (req, res) => {
 });
 
 exports.getAllTags = catchAsyncError(async (req, res, next) => {
-  const tags = await tagsModel.find().sort({ createdAt: -1 }).lean();
+  const tags = await tagsModel
+    .find({ $or: [{ role: "Admin" }, { userId: req.userId }] })
+    .sort({ createdAt: -1 })
+    .lean();
   res.status(200).json({
     success: true,
     tags,
-    message: "tags fetched Successfully",
+    message: "Tags fetched Successfully",
   });
 });
 

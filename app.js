@@ -116,13 +116,4 @@ module.exports = app;
 
 app.use(error);
 
-var obj = {
-  eventId: "d6b1e55d1f1ca7f1ee79a997ab79ee3625467dddb9911159b81caadd2af1b916",
-  eventTypeId: "consent.created",
-  links: {
-    event:
-      "https://au-api.basiq.io/events/d6b1e55d1f1ca7f1ee79a997ab79ee3625467dddb9911159b81caadd2af1b916",
-    eventEntity:
-      "https://au-api.basiq.io/users/aa59466e-bd3d-49b6-90f0-9253db6dc381/consents/2cc7bfcc-ade6-485a-92c3-c095f354466e",
-  },
-};
+
