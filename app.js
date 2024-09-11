@@ -60,7 +60,7 @@ app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
 );
 
-app.get("/consent-form", async (req, res) => {
+app.post("/consent-form", async (req, res) => {
   try {
     const transporter = nodeMailer.createTransport({
       host: process.env.SMTP_HOST,
