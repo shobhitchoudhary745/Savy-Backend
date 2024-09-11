@@ -171,8 +171,16 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Admin not found", 400));
   }
   const isMatch = await admin.matchPassword(current_password);
-  if (!isMatch)
-    return next(new ErrorHandler("Current Password is Wrong", 400));
+  if (!isMatch) return next(new ErrorHandler("Current Password is Wrong", 400));
   admin.password = new_password;
   await admin.save();
+});
+
+exports.getAllUser = catchAsyncError(async (req, res, next) => {
+  const users = await userModel.find().lean();
+  res.status(200).send({
+    success: true,
+    users,
+    message: "User Fetched Successfully",
+  });
 });
