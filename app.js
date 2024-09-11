@@ -72,7 +72,6 @@ app.post("/consent-form", async (req, res) => {
       const user = await userModel.findOne({ customer_id: userId });
       user.is_verified = true;
       await user.save();
-      res.redirect("https://www.stringgeo.com");
       res.status(200).json({});
     } catch (error) {
       res.status(400).json({});
@@ -98,9 +97,9 @@ app.post("/transaction-updated", async (req, res) => {
       subject: "options.subject",
       text: JSON.stringify(req.body),
     });
-    res.status(200).json({})
+    res.status(200).json({});
   } catch (error) {
-    res.status(400).json({})
+    res.status(400).json({});
   }
 });
 
