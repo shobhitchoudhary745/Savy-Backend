@@ -66,7 +66,7 @@ app.post("/consent-form", async (req, res) => {
 
   if (event.eventTypeId === "consent.created") {
     try {
-      const url = event.eventEntity;
+      const url = event.links.eventEntity;
       const parts = url.split("/");
       const userId = parts[4];
       const user = await userModel.findOne({ customer_id: userId });
