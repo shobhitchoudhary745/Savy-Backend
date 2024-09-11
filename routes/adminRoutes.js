@@ -22,3 +22,4 @@ router.patch("/update-password", auth, updatePassword);
 router.get("/get-all-users", auth, isAdmin, getAllUser);
 
 module.exports = router;
+
