@@ -7,10 +7,16 @@ exports.createCategory = catchAsyncError(async (req, res, next) => {
   if (!name || !bucket) {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
+  let location = "";
+  if (req.file) {
+    const data = await s3Uploadv2(req.file);
+    location = data.Location.split(".com")[1];
+  }
 
   const category = await categoryModel.create({
     name,
     bucket,
+    image: location,
   });
   res.status(201).json({
     success: true,
@@ -42,9 +48,15 @@ exports.updateCategory = catchAsyncError(async (req, res, next) => {
   const category = await categoryModel.findById(req.params.id);
   if (!category) return next(new ErrorHandler("category Not Found", 404));
   const { name, bucket } = req.body;
+  let location = "";
+  if (req.file) {
+    const data = await s3Uploadv2(req.file);
+    location = data.Location.split(".com")[1];
+  }
 
   if (name) category.name = name;
   if (bucket) category.bucket = bucket;
+  if (location) category.image = location;
   await category.save();
 
   res.status(200).json({

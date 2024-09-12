@@ -9,6 +9,9 @@ const Schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Bucket",
     },
+    image: {
+      type: String,
+    },
   },
 
   { timestamps: true }
