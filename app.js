@@ -102,7 +102,7 @@ app.post("/consent-form", async (req, res) => {
           description: trans.description,
           amount: Number(trans.amount),
           direction: trans.direction,
-          time: trans.postDate,
+          date: new Date(trans.postDate),
           account_id: account.data[0].id,
           user: user._id,
         };
