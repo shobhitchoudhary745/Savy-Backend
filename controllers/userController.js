@@ -433,11 +433,11 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   const transactions = await transactionModel.find({
     user: req.userId,
     account_id: user.account_id,
-  });
+  }).lean();
   let moneyIn = 0,
     moneyOut = 0;
 
-  for (const transaction of transactions.data) {
+  for (const transaction of transactions) {
     if (transaction.direction == "credit") {
       moneyIn += Number(transaction.amount);
     } else moneyOut += Number(transaction.amount);
