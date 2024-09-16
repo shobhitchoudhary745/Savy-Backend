@@ -2,6 +2,7 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const axios = require("axios");
 const API_KEY = process.env.BASIC_API;
+const transactionModel = require("../models/transactionModel");
 
 const userModel = require("../models/userModel");
 const { generateOtp } = require("../utils/generateCode");
@@ -414,32 +415,25 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   const token = await getToken();
   const currentYear = new Date().getFullYear();
   const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-  const { data: account } =  await axios.get(
-    `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  if (account.data.length == 0)
-    return res.status(200).json({ success: true, message: "No data is found" });
-  const userName = account.data[0].accountHolder;
-  const totalAmount = account.data[0].balance;
-  const creditCard = account.data[0].creditLimit || 0;
+  // const { data: account } =  await axios.get(
+  //   `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
+  //   {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   }
+  // );
+  // if (account.data.length == 0)
+  //   return res.status(200).json({ success: true, message: "No data is found" });
+  const userName = user.user_name;
+  const totalAmount = user.amount;
+  const creditCard = user.credit_card || 0;
   const monthlyMoneyOut = Array(12).fill(0);
   const monthlyMoneyIn = Array(12).fill(0);
-  const { data: transactions } = await axios.get(
-    `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        from: new Date("2023-09-01T00:00:00Z").toISOString() 
-      }
-    }
-  );
+  const transactions = await transactionModel.find({
+    user: req.userId,
+    account_id: user.account_id,
+  });
   let moneyIn = 0,
     moneyOut = 0;
 
@@ -502,18 +496,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       card2: {
         monthlyMoneyIn: graphData2,
       },
-      transactions: transactions.data
-        .map((trans) => {
-          return {
-            description: trans.description,
-            amount:
-              trans.direction === "credit"
-                ? Number(trans.amount)
-                : Number(trans.amount) * -1,
-            time: trans.postDate,
-          };
-        })
-        .slice(0, 5),
+      transactions: transactions.slice(0, 5),
     },
     messaage: "Account Fetched Successfully",
   });
