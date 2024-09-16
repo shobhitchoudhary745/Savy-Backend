@@ -84,7 +84,7 @@ app.post("/consent-form", async (req, res) => {
           },
         }
       );
-      if (account.data.length == 0) {
+      if (account.data.length != 0) {
         user.user_name = account.data[0].accountHolder;
         user.account_id = account.data[0].id;
         user.amount = account.data[0].balance;
