@@ -6,7 +6,7 @@ const Schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    accpunt_no: {
+    account_no: {
       type: String,
     },
     description: {

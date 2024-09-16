@@ -489,7 +489,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
         "Credit Card": creditCard,
         moneyInVsMoneyOut: [
           { name: "Money In", uv: moneyIn },
-          { name: "Money Out", uv: moneyOut * -1 },
+          { name: "Money Out", uv: moneyOut  },
         ],
         monthlyMoneyOut: graphData,
       },
