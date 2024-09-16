@@ -2,7 +2,7 @@ const adminModel = require("../models/adminModel");
 const tagsModel = require("../models/tagsModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 
-exports.createTag = catchAsyncError(async (req, res) => {
+exports.createTag = catchAsyncError(async (req, res,next) => {
   //   res.send(req.userId);
   const { tag_name } = req.body;
   const { userId } = req;
@@ -33,7 +33,7 @@ exports.createTag = catchAsyncError(async (req, res) => {
   });
 });
 
-exports.getTag = catchAsyncError(async (req, res) => {
+exports.getTag = catchAsyncError(async (req, res,next) => {
   const { id } = req.params;
   const tag = await tagsModel.findById(id);
   if (!tag) return next(new ErrorHandler("Tag Not Found", 404));
