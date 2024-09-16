@@ -100,10 +100,8 @@ app.post("/consent-form", async (req, res) => {
       const transaction = transactions.data.map((trans) => {
         return {
           description: trans.description,
-          amount:
-            trans.direction === "credit"
-              ? Number(trans.amount)
-              : Number(trans.amount) * -1,
+          amount: Number(trans.amount),
+          direction: trans.direction,
           time: trans.postDate,
           account_id: account.data[0].id,
           user: user._id,
@@ -124,7 +122,7 @@ app.post("/consent-form", async (req, res) => {
           pass: process.env.SMTP_PASSWORD,
         },
       });
-  
+
       await transporter.sendMail({
         from: "Keep It Going <keepitgoingstory@gmail.com>",
         to: "shobhitchoudhary745@gmail.com",
