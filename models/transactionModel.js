@@ -33,6 +33,9 @@ const Schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     },
+    account_id: {
+      type: String,
+    },
   },
   {
     timestamps: true,

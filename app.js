@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const nodeMailer = require("nodemailer");
+const getToken = require("./utils/getToken");
 
 dotenv.config({
   path: "./config/config.env",
@@ -41,6 +42,8 @@ const planRoutes = require("./routes/planRoutes");
 const pageRoutes = require("./routes/pageRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const userModel = require("./models/userModel");
+const axios = require("axios");
+const transactionModel = require("./models/transactionModel");
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
@@ -68,10 +71,47 @@ app.post("/consent-form", async (req, res) => {
 
   if (event.eventTypeId === "consent.created") {
     try {
+      const token = await getToken();
       const url = event.links.eventEntity;
       const parts = url.split("/");
       const userId = parts[4];
       const user = await userModel.findOne({ customer_id: userId });
+      const { data: account } = await axios.get(
+        `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (account.data.length == 0) {
+        user.user_name = account.data[0].accountHolder;
+        user.account_id = account.data[0].id;
+        user.amount = account.data[0].balance;
+        user.credit_card = account.data[0].creditLimit || 0;
+        const { data: transactions } = await axios.get(
+          `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const transaction = transactions.data.map((trans) => {
+          return {
+            description: trans.description,
+            amount:
+              trans.direction === "credit"
+                ? Number(trans.amount)
+                : Number(trans.amount) * -1,
+            time: trans.postDate,
+            account_id: account.data[0].id,
+            user: user._id,
+          };
+        });
+        await transactionModel.insertMany(transaction);
+      }
+
       user.is_verified = true;
       await user.save();
       res.status(200).json({});
@@ -116,4 +156,13 @@ module.exports = app;
 
 app.use(error);
 
-
+var obj = {
+  eventId: "4dd9c158dcc15c78481ad0f67422fb5249e3c9f3c99829f7cbde7c1f74adbbda",
+  eventTypeId: "transactions.updated",
+  links: {
+    event:
+      "https://au-api.basiq.io/events/4dd9c158dcc15c78481ad0f67422fb5249e3c9f3c99829f7cbde7c1f74adbbda",
+    eventEntity:
+      "https://au-api.basiq.io/users/436ee38c-453f-4c0d-98dd-c2fd4a273caa/transactions",
+  },
+};
