@@ -414,7 +414,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   const token = await getToken();
   const currentYear = new Date().getFullYear();
   const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-  const { data: account } = await await axios.get(
+  const { data: account } =  await axios.get(
     `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
     {
       headers: {

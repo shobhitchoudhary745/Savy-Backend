@@ -77,40 +77,39 @@ app.post("/consent-form", async (req, res) => {
       const userId = parts[4];
       const user = await userModel.findOne({ customer_id: userId });
       const { data: account } = await axios.get(
-        `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
+        `https://au-api.basiq.io/users/${userId}/accounts`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      if (account.data.length != 0) {
-        user.user_name = account.data[0].accountHolder;
-        user.account_id = account.data[0].id;
-        user.amount = account.data[0].balance;
-        user.credit_card = account.data[0].creditLimit || 0;
-        const { data: transactions } = await axios.get(
-          `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const transaction = transactions.data.map((trans) => {
-          return {
-            description: trans.description,
-            amount:
-              trans.direction === "credit"
-                ? Number(trans.amount)
-                : Number(trans.amount) * -1,
-            time: trans.postDate,
-            account_id: account.data[0].id,
-            user: user._id,
-          };
-        });
-        await transactionModel.insertMany(transaction);
-      }
+
+      user.user_name = account.data[0].accountHolder;
+      user.account_id = account.data[0].id;
+      user.amount = account.data[0].balance;
+      user.credit_card = account.data[0].creditLimit || 0;
+      const { data: transactions } = await axios.get(
+        `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const transaction = transactions.data.map((trans) => {
+        return {
+          description: trans.description,
+          amount:
+            trans.direction === "credit"
+              ? Number(trans.amount)
+              : Number(trans.amount) * -1,
+          time: trans.postDate,
+          account_id: account.data[0].id,
+          user: user._id,
+        };
+      });
+      await transactionModel.insertMany(transaction);
 
       user.is_verified = true;
       await user.save();
