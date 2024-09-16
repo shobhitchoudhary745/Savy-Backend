@@ -435,6 +435,9 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      params: {
+        from: new Date("2023-09-01T00:00:00Z").toISOString() 
+      }
     }
   );
   let moneyIn = 0,
