@@ -419,7 +419,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       user: req.userId,
       account_id: user.account_id,
     })
-    .sort({ createdAt: -1 })
+    .sort({ date: -1 })
     .lean();
   let moneyIn = 0,
     moneyOut = 0;
