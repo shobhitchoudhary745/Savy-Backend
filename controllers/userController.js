@@ -415,25 +415,17 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   const token = await getToken();
   const currentYear = new Date().getFullYear();
   const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-  // const { data: account } =  await axios.get(
-  //   `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
-  //   {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   }
-  // );
-  // if (account.data.length == 0)
-  //   return res.status(200).json({ success: true, message: "No data is found" });
   const userName = user.user_name;
   const totalAmount = user.amount;
   const creditCard = user.credit_card || 0;
   const monthlyMoneyOut = Array(12).fill(0);
   const monthlyMoneyIn = Array(12).fill(0);
-  const transactions = await transactionModel.find({
-    user: req.userId,
-    account_id: user.account_id,
-  }).lean();
+  const transactions = await transactionModel
+    .find({
+      user: req.userId,
+      account_id: user.account_id,
+    })
+    .lean();
   let moneyIn = 0,
     moneyOut = 0;
 
@@ -489,7 +481,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
         "Credit Card": creditCard,
         moneyInVsMoneyOut: [
           { name: "Money In", uv: moneyIn },
-          { name: "Money Out", uv: moneyOut  },
+          { name: "Money Out", uv: moneyOut * -1 },
         ],
         monthlyMoneyOut: graphData,
       },
