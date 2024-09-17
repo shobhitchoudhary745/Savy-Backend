@@ -1,25 +1,23 @@
 const cron = require("node-cron");
-const Order = require("../@order_entity/order.model");
-const User = require("../@user_entity/user.model");
+const nodeMailer = require("nodemailer");
 
-cron.schedule("0 0 * * *", async () => {
+cron.schedule("*/30 * * * *", async () => {
   try {
-    const expiredOrders = await Order.find({
-      expiry_date: { $lte: new Date() },
-      status: "Active",
+    const transporter = nodeMailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
     });
-    await Order.updateMany(
-      { _id: { $in: expiredOrders.map((order) => order._id) } },
-      { status: "Expire" }
-    );
-    for (const order of expiredOrders) {
-      const user = await User.findById(order.user);
-      if (user) {
-        user.device_ids = [];
-        await user.save();
-      }
-    }
-  } catch (error) {
-    console.log(error);
-  }
+
+    await transporter.sendMail({
+      from: "Keep It Going <keepitgoingstory@gmail.com>",
+      to: "shobhitchoudhary745@gmail.com",
+      subject: "optionssubject",
+      text: "Webhook is working",
+    });
+  } catch (error) {}
 });

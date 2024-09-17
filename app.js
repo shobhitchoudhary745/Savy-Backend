@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const nodeMailer = require("nodemailer");
 const getToken = require("./utils/getToken");
+require("./utils/cronJobs");
 
 dotenv.config({
   path: "./config/config.env",
