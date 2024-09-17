@@ -13,12 +13,10 @@ const months = require("../utils/helper");
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
   const newUser = {
-    // first_name: user.first_name,
-    // last_name: user.last_name,
     email: user.email,
-    // is_verfied: user.is_verfied,
+    user_name: user.user_name,
     _id: user._id,
-    // profile_url: user.profile_url,
+    account_id: user.account_id,
   };
   if (purpose) {
     res.status(201).send({
@@ -149,9 +147,6 @@ exports.login = catchAsyncError(async (req, res, next) => {
   const isPasswordMatched = await user.comparePassword(password);
   if (!isPasswordMatched)
     return next(new ErrorHandler("Invalid email or password!", 401));
-  // if (!user.is_verified) {
-  //   return next(new ErrorHandler("Verify Your Email before login.", 403));
-  // }
 
   sendData(user, 200, res);
 });
@@ -412,7 +407,6 @@ exports.getUserBanks = catchAsyncError(async (req, res, next) => {
 
 exports.getGraphData = catchAsyncError(async (req, res, next) => {
   const user = await userModel.findById(req.userId);
-  const token = await getToken();
   const currentYear = new Date().getFullYear();
   const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
   const userName = user.user_name;

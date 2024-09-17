@@ -136,22 +136,22 @@ app.post("/consent-form", async (req, res) => {
 
 app.post("/transaction-updated", async (req, res) => {
   try {
-    const transporter = nodeMailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: true,
-      auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
+    // const transporter = nodeMailer.createTransport({
+    //   host: process.env.SMTP_HOST,
+    //   port: process.env.SMTP_PORT,
+    //   secure: true,
+    //   auth: {
+    //     user: process.env.SMTP_EMAIL,
+    //     pass: process.env.SMTP_PASSWORD,
+    //   },
+    // });
 
-    await transporter.sendMail({
-      from: "Keep It Going <keepitgoingstory@gmail.com>",
-      to: "shobhitchoudhary745@gmail.com",
-      subject: "options.subject",
-      text: JSON.stringify(req.body),
-    });
+    // await transporter.sendMail({
+    //   from: "Keep It Going <keepitgoingstory@gmail.com>",
+    //   to: "shobhitchoudhary745@gmail.com",
+    //   subject: "options.subject",
+    //   text: JSON.stringify(req.body),
+    // });
     res.status(200).json({});
   } catch (error) {
     res.status(400).json({});
