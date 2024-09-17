@@ -170,13 +170,3 @@ module.exports = app;
 
 app.use(error);
 
-var obj = {
-  eventId: "4dd9c158dcc15c78481ad0f67422fb5249e3c9f3c99829f7cbde7c1f74adbbda",
-  eventTypeId: "transactions.updated",
-  links: {
-    event:
-      "https://au-api.basiq.io/events/4dd9c158dcc15c78481ad0f67422fb5249e3c9f3c99829f7cbde7c1f74adbbda",
-    eventEntity:
-      "https://au-api.basiq.io/users/436ee38c-453f-4c0d-98dd-c2fd4a273caa/transactions",
-  },
-};

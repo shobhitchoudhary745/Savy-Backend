@@ -11,7 +11,7 @@ cron.schedule("*/30 * * * *", async () => {
     const users = await userModel.find({ is_verified: true }).lean();
     for (const user of users) {
       await axios.post(
-        `https://au-api.basiq.io/customers/${user.customer_id}/connections/refresh`,
+        `https://au-api.basiq.io/users/${user.customer_id}/connections/refresh`,
         {},
         {
           headers: {
