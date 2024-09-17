@@ -617,3 +617,21 @@ exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
     messaage: "Cash Flow Data Fetched Successfully",
   });
 });
+
+exports.updateTransaction = catchAsyncError(async (req, res, next) => {
+  const transaction = await transactionModel.findById(req.params.id);
+  if (!transaction) return next(new ErrorHandler("Transaction Not Found", 400));
+  if (transaction.user.toString() != req.userId) {
+    return next(new ErrorHandler("You Don't have Access", 400));
+  }
+  const { category, tag, bucket } = req.body;
+  if (category) transaction.category = category;
+  if (bucket) transaction.bucket = bucket;
+  if (tag) transaction.tag = tag;
+
+  await transaction.save();
+  res.status(200).json({
+    success: true,
+    message: "Transaction Updated Successfully",
+  });
+});
