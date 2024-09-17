@@ -77,7 +77,7 @@ exports.deleteBucket = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBucketList = catchAsyncError(async (req, res, next) => {
-  const buckets = await bucketModel.find({}, { name: 1 }).lean();
+  const buckets = await bucketModel.find().lean();
   for (const bucket of buckets) {
     const categories = await categoryModel.find({ bucket: bucket._id });
     bucket.categories = categories;
