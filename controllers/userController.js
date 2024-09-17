@@ -434,17 +434,17 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       moneyIn += Number(transaction.amount);
     } else moneyOut += Number(transaction.amount);
     if (
-      new Date(transaction.postDate) >= yearStart &&
+      new Date(transaction.date) >= yearStart &&
       transaction.direction != "credit"
     ) {
-      const month = new Date(transaction.postDate).getMonth();
+      const month = new Date(transaction.date).getMonth();
       monthlyMoneyOut[month] += Number(transaction.amount);
     }
     if (
-      new Date(transaction.postDate) >= yearStart &&
+      new Date(transaction.date) >= yearStart &&
       transaction.direction == "credit"
     ) {
-      const month = new Date(transaction.postDate).getMonth();
+      const month = new Date(transaction.date).getMonth();
       monthlyMoneyIn[month] += Number(transaction.amount);
     }
   }
