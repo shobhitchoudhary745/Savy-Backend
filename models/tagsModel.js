@@ -16,6 +16,9 @@ const TagSchema = new mongoose.Schema(
       required: true,
       enum: ["Admin", "User"],
     },
+    image: {
+      type: String,
+    },
   },
   {
     timestamps: true,
