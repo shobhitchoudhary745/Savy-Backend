@@ -1,6 +1,7 @@
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const categoryModel = require("../models/categoryModel");
+const { s3Uploadv2 } = require("../utils/s3");
 
 exports.createCategory = catchAsyncError(async (req, res, next) => {
   const { name, bucket } = req.body;
