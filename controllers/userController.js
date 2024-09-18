@@ -513,32 +513,18 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
 
 exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
   const user = await userModel.findById(req.userId);
-  const token = await getToken();
   const currentYear = new Date().getFullYear();
   const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-  const { data: account } = await await axios.get(
-    `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  if (account.data.length == 0)
-    return res.status(200).json({ success: true, message: "No data is found" });
-
-  const { data: transactions } = await axios.get(
-    `https://au-api.basiq.io/users/${user.customer_id}/transactions?filter=account.id.eq('${account.data[0].id}')`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const transactions = await transactionModel
+    .find({
+      user: req.userId,
+      account_id: user.account_id,
+    })
+    .lean();
 
   const monthlyMoneyOut = Array(12).fill(0);
   const monthlyMoneyIn = Array(12).fill(0);
-  for (const transaction of transactions.data) {
+  for (const transaction of transactions) {
     if (
       new Date(transaction.postDate) >= yearStart &&
       transaction.direction != "credit"
@@ -615,7 +601,7 @@ exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
           -1,
   };
 
-  data.largeTransaction = transactions.data.sort(
+  data.largeTransaction = transactions.sort(
     (a, b) => Number(b.amount) - Number(a.amount)
   );
 
