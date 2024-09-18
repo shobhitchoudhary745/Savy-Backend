@@ -613,7 +613,7 @@ exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
           trans.direction == "debit"
             ? Number(trans.amount) * -1
             : Number(trans.amount),
-        time: trans.postDate,
+        time: trans.date,
         direction: trans.direction,
       };
     })
