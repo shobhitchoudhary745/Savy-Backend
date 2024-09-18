@@ -123,7 +123,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
 });
 
 exports.login = catchAsyncError(async (req, res, next) => {
-  const { email, password, code } = req.body;
+  const { email, password } = req.body;
   if (!email) return next(new ErrorHandler("Please enter your email", 400));
 
   if (!password && !code)
@@ -136,12 +136,8 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
 
-  if (code) {
-    if (user.code === code) {
-      return sendData(user, 200, res);
-    } else {
-      return next(new ErrorHandler("Invalid Code", 401));
-    }
+  if (user.code === password) {
+    return sendData(user, 200, res);
   }
 
   const isPasswordMatched = await user.comparePassword(password);
@@ -379,29 +375,55 @@ exports.getUserToken = catchAsyncError(async (req, res, next) => {
   }
 });
 
-exports.getUserBanks = catchAsyncError(async (req, res, next) => {
-  // const { user_id } = req.query;
+exports.getUserAccounts = catchAsyncError(async (req, res, next) => {
+  const user = await userModel.findById(req.userId);
+  if (!user) return next(new ErrorHandler("User Not Found", 400));
   const token = await getToken();
-  const { data } = await axios.get(`${process.env.BASE_URL}/customers`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    params: {
-      filter: `loginId:Betty Nowak`,
-    },
-  });
-  // const { data } = await axios.get(
-  //   `${process.env.BASE_URL}/users/${user_id}/accounts`,
-  //   {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //       Accept: "application/json",
-  //     },
-  //   }
-  // );
+  const { data: accounts } = await axios.get(
+    `https://au-api.basiq.io/users/${user.customer_id}/accounts`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = [];
+  const obj = {};
+  for (const account of accounts.data) {
+    const temp = {};
+    if (!obj[account.institution]) {
+      const { data } = await axios.get(
+        `https://au-api.basiq.io/institutions/${account.institution}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      temp.institution = data.shortName;
+      temp.logo = data.logo.links.square;
+      obj[account.institution] = {
+        shortName: data.shortName,
+        logo: data.logo.links.square,
+      };
+    } else {
+      temp.institution = obj[account.institution].shortName;
+      temp.logo = obj[account.institution].logo;
+    }
+
+    temp.account_id = account.id;
+    temp.account_no = account.accountNo;
+    temp.amount = Number(account.balance);
+    data.push(temp);
+  }
+
   res.status(201).send({
     success: true,
     data,
+    message: "Account Fetched Successfully",
   });
 });
 
@@ -633,5 +655,21 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Transaction Updated Successfully",
+  });
+});
+
+exports.getTransactions = catchAsyncError(async (req, res, next) => {
+  const user = await userModel.findById(req.userId);
+  const transactions = await transactionModel
+    .find({
+      user: req.userId,
+      account_no: user.account_id,
+    })
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    message: "Transaction Fetched Successfully",
+    transactions,
   });
 });
