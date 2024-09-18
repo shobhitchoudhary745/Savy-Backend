@@ -30,6 +30,7 @@ exports.createTag = catchAsyncError(async (req, res, next) => {
       tag_name,
       userId,
       role: "Admin",
+      image: location
     });
   }
 
