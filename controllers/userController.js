@@ -663,7 +663,7 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const transactions = await transactionModel
     .find({
       user: req.userId,
-      account_no: user.account_id,
+      account_id: user.account_id,
     })
     .lean();
 
@@ -671,5 +671,6 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Transaction Fetched Successfully",
     transactions,
+    user,
   });
 });
