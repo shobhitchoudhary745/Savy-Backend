@@ -691,6 +691,7 @@ exports.getTransaction = catchAsyncError(async (req, res, next) => {
     total += Math.abs(t.amount);
   }
   transaction.total = transactions.length;
+  transaction.spend = total;
   transaction.average = Math.round(total / transactions.length);
   res.status(200).json({
     success: true,
