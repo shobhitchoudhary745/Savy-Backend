@@ -9,6 +9,7 @@ const { generateOtp } = require("../utils/generateCode");
 const { sendEmail } = require("../utils/sendEmail");
 const getToken = require("../utils/getToken");
 const months = require("../utils/helper");
+const billModel = require("../models/billModel");
 
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
@@ -632,11 +633,18 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
   if (transaction.user.toString() != req.userId) {
     return next(new ErrorHandler("You Don't have Access", 400));
   }
-  const { category, tag, bucket } = req.body;
+  const { category, tag, bucket, notes, bill } = req.body;
   if (category) transaction.category = category;
   if (bucket) transaction.bucket = bucket;
   if (tag) transaction.tag = tag;
-
+  if (notes) transaction.notes = notes;
+  if (category && bill == "true") {
+    await billModel.create({
+      category,
+      budget_amount: transaction.amount,
+      user: req.userId,
+    });
+  }
   await transaction.save();
   res.status(200).json({
     success: true,
