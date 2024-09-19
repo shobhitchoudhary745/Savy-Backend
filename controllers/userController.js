@@ -638,7 +638,7 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
   if (bucket) transaction.bucket = bucket;
   if (tag) transaction.tag = tag;
   if (notes) transaction.notes = notes;
-  if (category && bill == "true") {
+  if (category && bill) {
     await billModel.create({
       category,
       budget_amount: Math.abs(transaction.amount),
