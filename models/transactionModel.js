@@ -36,6 +36,9 @@ const Schema = new mongoose.Schema(
     account_id: {
       type: String,
     },
+    notes: {
+      type: String,
+    },
   },
   {
     timestamps: true,

@@ -27,7 +27,11 @@ exports.createCategory = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCategorys = catchAsyncError(async (req, res, next) => {
-  const categorys = await categoryModel.find().sort({ createdAt: -1 }).lean();
+  const categorys = await categoryModel
+    .find()
+    .sort({ createdAt: -1 })
+    .populate("bucket")
+    .lean();
   res.status(200).json({
     success: true,
     categorys,
@@ -36,7 +40,9 @@ exports.getCategorys = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCategory = catchAsyncError(async (req, res, next) => {
-  const category = await categoryModel.findById(req.params.id);
+  const category = await categoryModel
+    .findById(req.params.id)
+    .populate("bucket");
   if (!category) return next(new ErrorHandler("Category Not Found", 404));
   res.status(200).json({
     success: true,
