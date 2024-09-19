@@ -16,6 +16,7 @@ const {
   updateTransaction,
   getUserAccounts,
   getTransactions,
+  getTransaction,
 } = require("../controllers/userController");
 const { upload } = require("../utils/s3");
 const router = express.Router();
@@ -34,5 +35,6 @@ router.get("/get-graph-data", auth, getGraphData);
 router.get("/get-cashflow-data", auth, getCashFlowData);
 router.patch("/update-transaction/:id", auth, updateTransaction);
 router.get("/get-transactions", auth, getTransactions);
+router.get("/get-transaction/:id", auth, getTransaction);
 
 module.exports = router;

@@ -646,17 +646,44 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
 
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const user = await userModel.findById(req.userId);
+  const { keyword } = req.query;
+  const query = {};
+  if (keyword) {
+    const keywordRegExp = new RegExp(keyword, "i");
+    query.description = { $regex: keywordRegExp };
+  }
   const transactions = await transactionModel
     .find({
       user: req.userId,
       account_id: user.account_id,
+      ...query,
     })
     .lean();
 
   res.status(200).json({
     success: true,
-    message: "Transaction Fetched Successfully",
+    message: "Transactions Fetched Successfully",
     transactions,
-    user,
+  });
+});
+
+exports.getTransaction = catchAsyncError(async (req, res, next) => {
+  const user = await userModel.findById(req.userId);
+  const transaction = await transactionModel.findById(req.params.id).lean();
+  let total = 0;
+  const transactions = await transactionModel.find({
+    user: req.userId,
+    account_id: user.account_id,
+    description: transaction.description,
+  });
+  for (let t of transactions) {
+    total += Math.abs(t.amount);
+  }
+  transaction.total = transactions.length;
+  transaction.average = Math.round(total / transactions.length);
+  res.status(200).json({
+    success: true,
+    message: "Transaction Fetched Successfully",
+    transaction,
   });
 });
