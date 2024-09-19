@@ -641,7 +641,7 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
   if (category && bill == "true") {
     await billModel.create({
       category,
-      budget_amount: transaction.amount,
+      budget_amount: Math.abs(transaction.amount),
       user: req.userId,
     });
   }
