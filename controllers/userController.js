@@ -654,11 +654,14 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
 
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const user = await userModel.findById(req.userId);
-  const { keyword } = req.query;
+  const { keyword, category } = req.query;
   const query = {};
   if (keyword) {
     const keywordRegExp = new RegExp(keyword, "i");
     query.description = { $regex: keywordRegExp };
+  }
+  if (category) {
+    query.category = category;
   }
   const transactions = await transactionModel
     .find({
