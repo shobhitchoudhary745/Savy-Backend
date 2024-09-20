@@ -592,9 +592,9 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
       }
       if (filter == "merchant") {
         if (current.description) {
-          if (obj[current.description])
-            obj[current.description] += current.amount;
-          else obj[current.description] = current.amount;
+          if (obj[current.description.split("-")[1]])
+            obj[current.description.split("-")[1]] += current.amount;
+          else obj[current.description.split("-")[1]] = current.amount;
         } else {
           if (obj.others) obj.others += current.amount;
           else obj.others = current.amount;
@@ -630,10 +630,16 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
   } else {
     let arr = [];
     total2 > total1 &&
-      arr.push({ name:"More than Last Period",uv: Math.abs(total2 - total1) });
+      arr.push({
+        name: "More than Last Period",
+        uv: Math.abs(total2 - total1),
+      });
     total2 < total1 &&
-      arr.push({ name:"Less than Last Period",uv: Math.abs(total2 - total1) });
-    arr.push({ name:"Last Period",uv: total1 });
+      arr.push({
+        name: "Less than Last Period",
+        uv: Math.abs(total2 - total1),
+      });
+    arr.push({ name: "Last Period", uv: total1 });
     moneyIn.graphData = arr;
     moneyIn.data = currentTransactions;
   }
