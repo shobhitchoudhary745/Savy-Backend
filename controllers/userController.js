@@ -683,7 +683,11 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
 
 exports.getTransaction = catchAsyncError(async (req, res, next) => {
   const user = await userModel.findById(req.userId);
-  const transaction = await transactionModel.findById(req.params.id).lean();
+  const transaction = await transactionModel
+    .findById(req.params.id)
+    .populate("category")
+    .populate("tag")
+    .lean();
   let total = 0;
   const transactions = await transactionModel.find({
     user: req.userId,
