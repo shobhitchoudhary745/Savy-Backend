@@ -545,6 +545,7 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
     .populate("bucket")
     .populate("tag")
     .lean();
+  const image = {};
 
   const total1 = previousTransactions.reduce((prev, current) => {
     return prev + current.amount;
@@ -555,7 +556,10 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
         if (current.category?.name) {
           if (obj[current.category.name])
             obj[current.category.name] += current.amount;
-          else obj[current.category.name] = current.amount;
+          else {
+            obj[current.category.name] = current.amount;
+            image[current.category.name] = current.category.image;
+          }
         } else {
           if (obj.others) obj.others += current.amount;
           else obj.others = current.amount;
@@ -565,7 +569,10 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
         if (current.bucket?.name) {
           if (obj[current.bucket.name])
             obj[current.bucket.name] += current.amount;
-          else obj[current.bucket.name] = current.amount;
+          else {
+            obj[current.bucket.name] = current.amount;
+            image[current.bucket.name] = current.bucket.image;
+          }
         } else {
           if (obj.others) obj.others += current.amount;
           else obj.others = current.amount;
@@ -574,7 +581,10 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
       if (filter == "tag") {
         if (current.tag?.name) {
           if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
-          else obj[current.tag.name] = current.amount;
+          else {
+            obj[current.tag.name] = current.amount;
+            image[current.tag.name] = current.tag?.image;
+          }
         } else {
           if (obj.others) obj.others += current.amount;
           else obj.others = current.amount;
@@ -611,6 +621,7 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
     arr2.push({
       ...temp,
       percent: parseFloat((obj[o] * 100) / total2).toFixed(2),
+      image: image[o] ? image[o] : "",
     });
   }
   if (filter && filter != "transaction") {
