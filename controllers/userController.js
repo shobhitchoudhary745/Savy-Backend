@@ -630,10 +630,10 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
   } else {
     let arr = [];
     total2 > total1 &&
-      arr.push({ name:"More than Last Period",value: Math.abs(total2 - total1) });
+      arr.push({ name:"More than Last Period",uv: Math.abs(total2 - total1) });
     total2 < total1 &&
-      arr.push({ name:"Less than Last Period",value: Math.abs(total2 - total1) });
-    arr.push({ name:"Last Period",value: total1 });
+      arr.push({ name:"Less than Last Period",uv: Math.abs(total2 - total1) });
+    arr.push({ name:"Last Period",uv: total1 });
     moneyIn.graphData = arr;
     moneyIn.data = currentTransactions;
   }
