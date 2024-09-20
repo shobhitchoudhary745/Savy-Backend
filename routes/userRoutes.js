@@ -12,11 +12,11 @@ const {
   getConnection,
   getUserToken,
   getGraphData,
-  getCashFlowData,
   updateTransaction,
   getUserAccounts,
   getTransactions,
   getTransaction,
+  getCashFlowDataIn,
 } = require("../controllers/userController");
 const { upload } = require("../utils/s3");
 const router = express.Router();
@@ -32,7 +32,7 @@ router.get("/get-user-connection", getConnection);
 router.get("/get-user-account", auth, getUserAccounts);
 router.post("/get-user-token", getUserToken);
 router.get("/get-graph-data", auth, getGraphData);
-router.get("/get-cashflow-data", auth, getCashFlowData);
+router.get("/get-cashflow-data-in", auth, getCashFlowDataIn);
 router.patch("/update-transaction/:id", auth, updateTransaction);
 router.get("/get-transactions", auth, getTransactions);
 router.get("/get-transaction/:id", auth, getTransaction);

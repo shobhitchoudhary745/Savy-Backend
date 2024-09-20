@@ -8,8 +8,8 @@ const userModel = require("../models/userModel");
 const { generateOtp } = require("../utils/generateCode");
 const { sendEmail } = require("../utils/sendEmail");
 const getToken = require("../utils/getToken");
-const months = require("../utils/helper");
 const billModel = require("../models/billModel");
+const { getTwoMonthRanges } = require("../utils/helper");
 
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
@@ -512,118 +512,125 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.getCashFlowData = catchAsyncError(async (req, res, next) => {
-  const user = await userModel.findById(req.userId);
-  const currentYear = new Date().getFullYear();
-  const yearStart = new Date(`${currentYear}-01-01T00:00:00.000Z`);
-  const transactions = await transactionModel
+exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
+  const { date, filter } = req.query;
+  const obj = {};
+  let dateRange;
+  if (date == "last_month") {
+    dateRange = getTwoMonthRanges(1, 2);
+  } else if (date == "last_three_month") {
+    dateRange = getTwoMonthRanges(2, 5);
+  } else if (date == "last_six_month") {
+    dateRange = getTwoMonthRanges(5, 8);
+  }
+  const previousTransactions = await transactionModel
     .find({
-      user: req.userId,
-      account_id: user.account_id,
+      date: {
+        $gt: dateRange[0][0],
+        $lte: dateRange[0][1],
+      },
+      direction: "credit",
     })
     .lean();
-
-  const monthlyMoneyOut = Array(12).fill(0);
-  const monthlyMoneyIn = Array(12).fill(0);
-  for (const transaction of transactions) {
-    if (
-      new Date(transaction.postDate) >= yearStart &&
-      transaction.direction != "credit"
-    ) {
-      const month = new Date(transaction.postDate).getMonth();
-      monthlyMoneyOut[month] += Number(transaction.amount);
-    }
-    if (
-      new Date(transaction.postDate) >= yearStart &&
-      transaction.direction == "credit"
-    ) {
-      const month = new Date(transaction.postDate).getMonth();
-      monthlyMoneyIn[month] += Number(transaction.amount);
-    }
-  }
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const graphData = monthlyMoneyOut.map((count, index) => ({
-    name: months[index],
-    uv: count * -1,
-  }));
-  const graphData2 = monthlyMoneyIn.map((count, index) => ({
-    name: months[index],
-    uv: count,
-  }));
-
-  const date = new Date();
-  const currentMonth = date.getMonth();
-
-  const data = {};
-  data.moneyIn = {
-    graphData: [
-      { name: "Previous Month", uv: graphData2[currentMonth - 1].uv },
-      { name: "Current Month", uv: graphData2[currentMonth].uv },
-    ],
-    percent:
-      graphData2[currentMonth - 1].uv > graphData2[currentMonth].uv
-        ? (((graphData2[currentMonth - 1].uv - graphData2[currentMonth].uv) *
-            100) /
-            graphData2[currentMonth - 1].uv) *
-          -1
-        : ((graphData2[currentMonth].uv - graphData2[currentMonth - 1].uv) *
-            100) /
-          graphData2[currentMonth - 1].uv,
-  };
-
-  data.moneyOut = {
-    graphData: [
-      { name: "Previous Month", uv: graphData[currentMonth - 1].uv },
-      { name: "Current Month", uv: graphData[currentMonth].uv },
-    ],
-    percent:
-      graphData[currentMonth - 1].uv > graphData[currentMonth].uv
-        ? ((graphData[currentMonth - 1].uv - graphData[currentMonth].uv) *
-            100) /
-          graphData[currentMonth - 1].uv
-        : (((graphData[currentMonth].uv - graphData[currentMonth - 1].uv) *
-            100) /
-            graphData[currentMonth - 1].uv) *
-          -1,
-  };
-
-  data.largeTransaction = transactions.sort(
-    (a, b) => Number(b.amount) - Number(a.amount)
-  );
-
-  data.largeTransaction = data.largeTransaction
-    .map((trans) => {
-      return {
-        description: trans.description,
-        amount:
-          trans.direction == "debit"
-            ? Number(trans.amount) * -1
-            : Number(trans.amount),
-        time: trans.date,
-        direction: trans.direction,
-      };
+  const currentTransactions = await transactionModel
+    .find({
+      date: {
+        $gt: dateRange[1][0],
+        $lte: dateRange[1][1],
+      },
+      direction: "credit",
     })
-    .slice(0, 5);
+    .sort({ amount: 1 })
+    .populate("category")
+    .populate("bucket")
+    .populate("tag")
+    .lean();
+
+  const total1 = previousTransactions.reduce((prev, current) => {
+    return prev + current.amount;
+  }, 0);
+  const total2 = currentTransactions.reduce((prev, current) => {
+    if (filter) {
+      if (filter == "category") {
+        if (current.category?.name) {
+          if (obj[current.category.name])
+            obj[current.category.name] += current.amount;
+          else obj[current.category.name] = current.amount;
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+      if (filter == "bucket") {
+        if (current.bucket?.name) {
+          if (obj[current.bucket.name])
+            obj[current.bucket.name] += current.amount;
+          else obj[current.bucket.name] = current.amount;
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+      if (filter == "tag") {
+        if (current.tag?.name) {
+          if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
+          else obj[current.tag.name] = current.amount;
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+      if (filter == "merchant") {
+        if (current.description) {
+          if (obj[current.description])
+            obj[current.description] += current.amount;
+          else obj[current.description] = current.amount;
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+    }
+    return prev + current.amount;
+  }, 0);
+  const moneyIn = {};
+  moneyIn.total = total2;
+  moneyIn.last = total1;
+  moneyIn.last_period = {
+    amount: Math.abs(total1 - total2),
+    key: total1 < total2 ? "More than last period" : "Less than last period",
+  };
+  const arr = [];
+  const arr2 = [];
+  for (let o in obj) {
+    let temp = {};
+    temp.name = o;
+    temp.value = obj[o];
+    arr.push(temp);
+
+    arr2.push({
+      ...temp,
+      percent: parseFloat((obj[o] * 100) / total2).toFixed(2),
+    });
+  }
+  if (filter && filter != "transaction") {
+    moneyIn.graphData = arr;
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
+  } else {
+    let arr = [];
+    total2 > total1 &&
+      arr.push({ "More than Last Period": Math.abs(total2 - total1) });
+    total2 < total1 &&
+      arr.push({ "Less than Last Period": Math.abs(total2 - total1) });
+    arr.push({ "Last Period": total2 });
+    moneyIn.graphData = arr;
+    moneyIn.transaction = currentTransactions;
+  }
 
   res.status(200).send({
     success: true,
-    cashFlowData: data,
-    messaage: "Cash Flow Data Fetched Successfully",
+    moneyIn,
+    messaage: "Cash In Data Fetched Successfully",
   });
 });
 
