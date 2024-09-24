@@ -739,9 +739,24 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
       }
       if (filter == "merchant") {
         if (current.description) {
-          if (obj[current.description.split("-")[1]])
-            obj[current.description.split("-")[1]] += current.amount;
-          else obj[current.description.split("-")[1]] = current.amount;
+          if (
+            obj[
+              current.description.split("-")[
+                current.description.split("-").length - 1
+              ]
+            ]
+          )
+            obj[
+              current.description.split("-")[
+                current.description.split("-").length - 1
+              ]
+            ] += current.amount;
+          else
+            obj[
+              current.description.split("-")[
+                current.description.split("-").length - 1
+              ]
+            ] = current.amount;
         } else {
           if (obj.others) obj.others += current.amount;
           else obj.others = current.amount;
