@@ -665,8 +665,8 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
   let previousTransactions = await transactionModel
     .find({
       date: {
-        $gt: dateRange[0][0],
-        $lte: dateRange[0][1],
+        $gt: new Date("2024-08-01"),
+        $lte: new Date("2024-08-31"),
       },
       direction: "debit",
     })
@@ -674,8 +674,8 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
   let currentTransactions = await transactionModel
     .find({
       date: {
-        $gt: dateRange[1][0],
-        $lte: dateRange[1][1],
+        $gt: new Date("2024-09-01"),
+        $lte: new Date("2024-09-31"),
       },
       direction: "debit",
     })
@@ -684,12 +684,14 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
     .populate("bucket")
     .populate("tag")
     .lean();
+
   previousTransactions = previousTransactions.map((tran) => {
     return { ...tran, amount: tran.amount * -1 };
   });
-  currentTransactions = previousTransactions.map((tran) => {
+  currentTransactions = currentTransactions.map((tran) => {
     return { ...tran, amount: tran.amount * -1 };
   });
+
   const image = {};
 
   const total1 = previousTransactions.reduce((prev, current) => {
