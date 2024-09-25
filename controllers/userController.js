@@ -526,8 +526,8 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
   const previousTransactions = await transactionModel
     .find({
       date: {
-        $gt: dateRange[0][0],
-        $lte: dateRange[0][1],
+        $gt: new Date("2024-08-01"),
+        $lte: new Date("2024-08-31"),
       },
       direction: "credit",
     })
@@ -535,8 +535,8 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
   const currentTransactions = await transactionModel
     .find({
       date: {
-        $gt: dateRange[1][0],
-        $lte: dateRange[1][1],
+        $gt: new Date("2024-09-01"),
+        $lte: new Date("2024-09-31"),
       },
       direction: "credit",
     })
@@ -810,6 +810,171 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
     success: true,
     moneyOut: moneyIn,
     messaage: "Cash Out Data Fetched Successfully",
+  });
+});
+
+exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
+  const { date, filter } = req.query;
+  const obj = {};
+  let dateRange;
+  if (date == "last_month") {
+    dateRange = getTwoMonthRanges(1, 2);
+  } else if (date == "last_three_month") {
+    dateRange = getTwoMonthRanges(2, 5);
+  } else if (date == "last_six_month") {
+    dateRange = getTwoMonthRanges(5, 8);
+  }
+  let previousTransactions = await transactionModel
+    .find({
+      date: {
+        $gt: new Date("2024-08-01"),
+        $lte: new Date("2024-08-31"),
+      },
+    })
+    .lean();
+  let currentTransactions = await transactionModel
+    .find({
+      date: {
+        $gt: new Date("2024-09-01"),
+        $lte: new Date("2024-09-31"),
+      },
+    })
+    .sort({ amount: 1 })
+    .populate("category")
+    .populate("bucket")
+    .populate("tag")
+    .lean();
+
+  previousTransactions = previousTransactions.map((tran) => {
+    return { ...tran, amount: Math.abs(tran.amount) };
+  });
+  currentTransactions = currentTransactions.map((tran) => {
+    return { ...tran, amount: Math.abs(tran.amount) };
+  });
+
+  const image = {};
+
+  const total1 = previousTransactions.reduce((prev, current) => {
+    return prev + current.amount;
+  }, 0);
+  const total2 = currentTransactions.reduce((prev, current) => {
+    if (filter) {
+      if (filter == "category") {
+        if (current.category?.name) {
+          if (obj[current.category.name])
+            obj[current.category.name] += current.amount;
+          else {
+            obj[current.category.name] = current.amount;
+            image[current.category.name] = current.category.image;
+          }
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+      if (filter == "bucket") {
+        if (current.bucket?.name) {
+          if (obj[current.bucket.name])
+            obj[current.bucket.name] += current.amount;
+          else {
+            obj[current.bucket.name] = current.amount;
+            image[current.bucket.name] = current.bucket.image;
+          }
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+      if (filter == "tag") {
+        if (current.tag?.name) {
+          if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
+          else {
+            obj[current.tag.name] = current.amount;
+            image[current.tag.name] = current.tag?.image;
+          }
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+      if (filter == "merchant") {
+        if (current.description) {
+          if (
+            obj[
+              current.description.split("-")[
+                current.description.split("-").length - 1
+              ]
+            ]
+          )
+            obj[
+              current.description.split("-")[
+                current.description.split("-").length - 1
+              ]
+            ] += current.amount;
+          else
+            obj[
+              current.description.split("-")[
+                current.description.split("-").length - 1
+              ]
+            ] = current.amount;
+        } else {
+          if (obj.others) obj.others += current.amount;
+          else obj.others = current.amount;
+        }
+      }
+    }
+    return prev + current.amount;
+  }, 0);
+  const moneyIn = {};
+  moneyIn.total = total2;
+  moneyIn.last = total1;
+  moneyIn.last_period = {
+    amount: Math.abs(total1 - total2),
+    key: total1 < total2 ? "More than last period" : "Less than last period",
+  };
+  const arr = [];
+  const arr2 = [];
+  for (let o in obj) {
+    let temp = {};
+    temp.name = o;
+    temp.value = obj[o];
+    arr.push(temp);
+
+    arr2.push({
+      ...temp,
+      percent: parseFloat((obj[o] * 100) / total2).toFixed(2),
+      image: image[o] ? image[o] : "",
+    });
+  }
+  if (filter && filter != "transaction") {
+    moneyIn.graphData = arr;
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
+  } else {
+    let arr = [];
+    total2 > total1 &&
+      arr.push({
+        name: "More than Last Period",
+        uv: Math.abs(total2 - total1),
+      });
+    total2 < total1 &&
+      arr.push({
+        name: "Less than Last Period",
+        uv: Math.abs(total2 - total1),
+      });
+    arr.push({ name: "Last Period", uv: total1 });
+    moneyIn.graphData = arr;
+    moneyIn.data = currentTransactions.map((t) => {
+      return {
+        ...t,
+        amount: t.direction == "credit" ? t.amount : t.amount * -1,
+      };
+    });
+  }
+
+  res.status(200).send({
+    success: true,
+    net: moneyIn,
+    messaage: "Net Amount Fetched Successfully",
   });
 });
 
