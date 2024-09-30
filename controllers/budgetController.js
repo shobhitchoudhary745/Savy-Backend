@@ -12,7 +12,7 @@ exports.createBudget = catchAsyncError(async (req, res, next) => {
   const obj = {};
 
   if (req.body.date) {
-    obj.date = new Date(re.body.date);
+    obj.date = new Date(req.body.date);
   }
   if (req.body.payday) {
     obj.payday = payday;
