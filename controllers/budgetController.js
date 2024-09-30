@@ -9,18 +9,20 @@ exports.createBudget = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
 
-  let date = null;
+  const obj = {};
 
   if (req.body.date) {
-    date = new Date(date);
+    obj.date = new Date(date);
+  }
+  if (req.body.payday) {
+    obj.payday = payday;
   }
   const budget1 = await budgetModel.create({
     category,
-    payday: payday ? payday : "",
     budget_amount,
     user: req.userId,
     is_bill,
-    date,
+    ...obj,
   });
   if (is_bill) {
     await billModel.create({ category, budget: budget1._id, budget_amount });
