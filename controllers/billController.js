@@ -3,16 +3,22 @@ const ErrorHandler = require("../utils/errorHandler");
 const billModel = require("../models/billModel");
 
 exports.createBill = catchAsyncError(async (req, res, next) => {
-  const { category, budget, budget_amount } = req.body;
+  const { category, budget, budget_amount, date } = req.body;
   if (!category || !budget_amount) {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
-
+  const obj = {};
+  if (req.body.budget) {
+    obj.budget = budget;
+  }
+  if (req.body.date) {
+    obj.date = req.body.date;
+  }
   const bill = await billModel.create({
     category,
-    budget: budget ? budget : "",
     budget_amount,
     user: req.userId,
+    ...obj,
   });
   res.status(201).json({
     success: true,
