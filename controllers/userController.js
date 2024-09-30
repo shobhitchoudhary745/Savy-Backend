@@ -442,15 +442,28 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       user: req.userId,
       account_id: user.account_id,
     })
+    .populate("category")
     .sort({ date: -1 })
     .lean();
   let moneyIn = 0,
     moneyOut = 0;
-
+  const obj = {};
   for (const transaction of transactions) {
     if (transaction.direction == "credit") {
       moneyIn += Number(transaction.amount);
-    } else moneyOut += Number(transaction.amount);
+    } else {
+      moneyOut += Number(transaction.amount);
+      if (!transaction.category) {
+        if (!obj.others) obj.others = Math.abs(transaction.amount);
+        else obj.others += Math.abs(transaction.amount);
+      } else {
+        if (obj.category.name) {
+          obj.category.name += Math.abs(transaction.amount);
+        } else {
+          obj.category.name = Math.abs(transaction.amount);
+        }
+      }
+    }
     if (
       new Date(transaction.date) >= yearStart &&
       transaction.direction != "credit"
@@ -465,6 +478,14 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       const month = new Date(transaction.date).getMonth();
       monthlyMoneyIn[month] += Number(transaction.amount);
     }
+  }
+
+  const graph = [];
+  for (let data in obj) {
+    const obj = {};
+    obj.name = data;
+    obj.value = obj[data];
+    graph.push(obj);
   }
 
   const months = [
@@ -494,6 +515,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
     success: true,
     dashboardData: {
       userName,
+      moneyOutGraph: graph,
       card1: {
         "Total amount": totalAmount,
         "Credit Card": creditCard,
