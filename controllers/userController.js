@@ -457,10 +457,10 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
         if (!obj.others) obj.others = Math.abs(transaction.amount);
         else obj.others += Math.abs(transaction.amount);
       } else {
-        if (obj.category.name) {
-          obj.category.name += Math.abs(transaction.amount);
+        if (obj[transaction.category.name]) {
+          obj[transaction.category.name] += Math.abs(transaction.amount);
         } else {
-          obj.category.name = Math.abs(transaction.amount);
+          obj[transaction.category.name] = Math.abs(transaction.amount);
         }
       }
     }
