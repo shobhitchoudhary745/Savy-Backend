@@ -481,11 +481,12 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   }
 
   const graph = [];
+  
   for (let data in obj) {
-    const obj = {};
-    obj.name = data;
-    obj.value = obj[data];
-    graph.push(obj);
+    const obj1 = {};
+    obj1.name = data;
+    obj1.value = obj[data];
+    graph.push(obj1);
   }
 
   const months = [
