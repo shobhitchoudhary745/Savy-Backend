@@ -9,12 +9,18 @@ exports.createBudget = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
 
+  let date = null;
+
+  if (req.body.date) {
+    date = new Date(date);
+  }
   const budget1 = await budgetModel.create({
     category,
     payday: payday ? payday : "",
     budget_amount,
     user: req.userId,
     is_bill,
+    date,
   });
   if (is_bill) {
     await billModel.create({ category, budget: budget1._id, budget_amount });
@@ -29,6 +35,8 @@ exports.createBudget = catchAsyncError(async (req, res, next) => {
 exports.getBudgets = catchAsyncError(async (req, res, next) => {
   const budgets = await budgetModel
     .find({ user: req.userId })
+    .populate("payday")
+    .populate("category")
     .sort({ createdAt: -1 })
     .lean();
   res.status(200).json({
@@ -39,7 +47,11 @@ exports.getBudgets = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBudget = catchAsyncError(async (req, res, next) => {
-  const budget = await budgetModel.findById(req.params.id);
+  const budget = await budgetModel
+    .findById(req.params.id)
+    .populate("payday")
+    .populate("category")
+    .lean();
   if (!budget) return next(new ErrorHandler("Budget Not Found", 404));
   res.status(200).json({
     success: true,

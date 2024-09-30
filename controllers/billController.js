@@ -35,7 +35,7 @@ exports.getBills = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBill = catchAsyncError(async (req, res, next) => {
-  const bill = await billModel.findById(req.params.id);
+  const bill = await billModel.findById(req.params.id).populate("category");
   if (!bill) return next(new ErrorHandler("Bill Not Found", 404));
   res.status(200).json({
     success: true,

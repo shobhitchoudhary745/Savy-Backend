@@ -21,6 +21,9 @@ const Schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    date: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
