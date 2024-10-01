@@ -38,7 +38,12 @@ exports.getBudgets = catchAsyncError(async (req, res, next) => {
   const budgets = await budgetModel
     .find({ user: req.userId })
     .populate("payday")
-    .populate("category")
+    .populate({
+      path: "category",
+      populate: {
+        path: "bucket",
+      },
+    })
     .sort({ createdAt: -1 })
     .lean();
   res.status(200).json({
@@ -52,7 +57,12 @@ exports.getBudget = catchAsyncError(async (req, res, next) => {
   const budget = await budgetModel
     .findById(req.params.id)
     .populate("payday")
-    .populate("category")
+    .populate({
+      path: "category",
+      populate: {
+        path: "bucket",
+      },
+    })
     .lean();
   if (!budget) return next(new ErrorHandler("Budget Not Found", 404));
   res.status(200).json({
