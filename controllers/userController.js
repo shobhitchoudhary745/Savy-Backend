@@ -481,7 +481,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   }
 
   const graph = [];
-  
+
   for (let data in obj) {
     const obj1 = {};
     obj1.name = data;
@@ -532,6 +532,124 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       transactions: transactions.slice(0, 5),
     },
     messaage: "Account Fetched Successfully",
+  });
+});
+
+exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
+  const { date } = req.query;
+  let dateRange;
+  if (date == "last_month") {
+    dateRange = getTwoMonthRanges(1, 2);
+  } else if (date == "last_three_month") {
+    dateRange = getTwoMonthRanges(2, 5);
+  } else if (date == "last_six_month") {
+    dateRange = getTwoMonthRanges(5, 8);
+  }
+  const previousTransactions = await transactionModel
+    .find({
+      date: {
+        $gt: new Date("2024-08-01"),
+        $lte: new Date("2024-08-31"),
+      },
+      direction: "credit",
+    })
+    .lean();
+  const currentTransactions = await transactionModel
+    .find({
+      date: {
+        $gt: new Date("2024-09-01"),
+        $lte: new Date("2024-09-31"),
+      },
+      direction: "credit",
+    })
+    .populate("category")
+    .populate("bucket")
+    .populate("tag")
+    .lean();
+  const overview = {};
+  const merchant = {},
+    category = {},
+    bucket = {},
+    categoryImage = {},
+    bucketImage = {};
+
+  for (const transaction of currentTransactions) {
+    if (transaction.category) {
+      if (category[transaction.category.name])
+        category[transaction.category.name] += Math.abs(transaction.amount);
+      else {
+        category[transaction.category.name] = Math.abs(transaction.amount);
+        categoryImage[transaction.category.name] = transaction.category.image;
+      }
+    } else {
+      if (category.others) category.others += Math.abs(transaction.amount);
+      else category.others = Math.abs(transaction.amount);
+    }
+
+    if (transaction.bucket) {
+      if (bucket[transaction.bucket.name])
+        bucket[transaction.bucket.name] += Math.abs(transaction.amount);
+      else {
+        bucket[transaction.bucket.name] = Math.abs(transaction.amount);
+        bucketImage[transaction.bucket.name] = transaction.bucket.image;
+      }
+    } else {
+      if (bucket.others) bucket.others += Math.abs(transaction.amount);
+      else bucket.others = Math.abs(transaction.amount);
+    }
+
+    if (
+      merchant[
+        transaction.description.split("-")[
+          transaction.description.split("-").length - 1
+        ]
+      ]
+    )
+      merchant[
+        transaction.description.split("-")[
+          transaction.description.split("-").length - 1
+        ]
+      ] += Math.abs(transaction.amount);
+    else
+      merchant[
+        transaction.description.split("-")[
+          transaction.description.split("-").length - 1
+        ]
+      ] = Math.abs(transaction.amount);
+  }
+  const arr = [];
+  for (let c in category) {
+    arr.push({
+      category: c,
+      value: category[c],
+      image: categoryImage[c] || "",
+    });
+  }
+  const arr2 = [];
+  for (let c in merchant) {
+    arr2.push({ merchant: c, value: merchant[c] });
+  }
+
+  const arr3 = [];
+  for (let c in bucket) {
+    arr3.push({ bucket: c, value: bucket[c], image: bucketImage[c] || "" });
+  }
+
+  overview.topCategory = arr.sort((a, b) => b.value - a.value).slice(0, 4);
+  overview.topBucket = arr3.sort((a, b) => b.value - a.value).slice(0, 4);
+  overview.topMerchant = arr2.sort((a, b) => b.value - a.value).slice(0, 4);
+
+  overview.recentLargestTransactions = currentTransactions
+    .map((tran) => {
+      return { ...tran, amount: Math.abs(tran.amount) };
+    })
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 4);
+
+  res.status(200).send({
+    success: true,
+    overview,
+    messaage: "Overview Data Fetched Successfully",
   });
 });
 
