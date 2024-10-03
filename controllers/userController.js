@@ -754,11 +754,11 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
         }
       }
       if (filter == "tag") {
-        if (current.tag?.name) {
-          if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
+        if (current.tag?.tag_name) {
+          if (obj[current.tag.tag_name]) obj[current.tag.name] += current.amount;
           else {
-            obj[current.tag.name] = current.amount;
-            image[current.tag.name] = current.tag?.image;
+            obj[current.tag.tag_name] = current.amount;
+            image[current.tag.tag_name] = current.tag?.image;
           }
         } else {
           if (obj.others) obj.others += current.amount;
@@ -902,10 +902,10 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
       }
       if (filter == "tag") {
         if (current.tag?.name) {
-          if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
+          if (obj[current.tag.tag_name]) obj[current.tag.tag_name] += current.amount;
           else {
-            obj[current.tag.name] = current.amount;
-            image[current.tag.name] = current.tag?.image;
+            obj[current.tag.tag_name] = current.amount;
+            image[current.tag.tag_name] = current.tag?.image;
           }
         } else {
           if (obj.others) obj.others += current.amount;
@@ -1064,8 +1064,8 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
         if (current.tag?.name) {
           if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
           else {
-            obj[current.tag.name] = current.amount;
-            image[current.tag.name] = current.tag?.image;
+            obj[current.tag.tag_name] = current.amount;
+            image[current.tag.tag_name] = current.tag?.image;
           }
         } else {
           if (obj.others) obj.others += current.amount;
