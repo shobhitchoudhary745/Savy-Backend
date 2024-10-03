@@ -628,14 +628,14 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
   }
 
   overview.MoneyInvsOutData = [
-    { name: "Money In", value: moneyIn },
-    { name: "Money Out", value: moneyOut },
+    { name: "Money In", uv: moneyIn },
+    { name: "Money Out", uv: moneyOut },
   ];
   overview.moneyIn = {};
   overview.moneyOut = {};
   overview.moneyIn.graphData = [
-    { name: "Previous Month", value: previousMoneyIn },
-    { name: "Current Month", value: moneyIn },
+    { name: "Previous Month", uv: previousMoneyIn },
+    { name: "Current Month", uv: moneyIn },
   ];
   overview.moneyIn.percent =
     moneyIn > previousMoneyIn
@@ -643,8 +643,8 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
       : (((previousMoneyIn - moneyIn) * 100) / previousMoneyIn) * -1;
 
   overview.moneyOut.graphData = [
-    { name: "Previous Month", value: previousMoneyOut },
-    { name: "Current Month", value: moneyOut },
+    { name: "Previous Month", uv: previousMoneyOut },
+    { name: "Current Month", uv: moneyOut },
   ];
 
   overview.moneyOut.percent =
