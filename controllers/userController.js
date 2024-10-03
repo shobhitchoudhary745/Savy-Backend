@@ -755,7 +755,8 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
       }
       if (filter == "tag") {
         if (current.tag?.tag_name) {
-          if (obj[current.tag.tag_name]) obj[current.tag.name] += current.amount;
+          if (obj[current.tag.tag_name])
+            obj[current.tag.tag_name] += current.amount;
           else {
             obj[current.tag.tag_name] = current.amount;
             image[current.tag.tag_name] = current.tag?.image;
@@ -901,8 +902,9 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
         }
       }
       if (filter == "tag") {
-        if (current.tag?.name) {
-          if (obj[current.tag.tag_name]) obj[current.tag.tag_name] += current.amount;
+        if (current.tag?.tag_name) {
+          if (obj[current.tag.tag_name])
+            obj[current.tag.tag_name] += current.amount;
           else {
             obj[current.tag.tag_name] = current.amount;
             image[current.tag.tag_name] = current.tag?.image;
@@ -1198,6 +1200,9 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
       account_id: user.account_id,
       ...query,
     })
+    .populate("category")
+    .populate("bucket")
+    .populate("tag")
     .lean();
 
   res.status(200).json({
