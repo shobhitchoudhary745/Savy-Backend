@@ -547,6 +547,7 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
   }
   const previousTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-08-01"),
         $lte: new Date("2024-08-31"),
@@ -555,6 +556,7 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
     .lean();
   const currentTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-09-01"),
         $lte: new Date("2024-09-31"),
@@ -700,6 +702,7 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
   }
   const previousTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-08-01"),
         $lte: new Date("2024-08-31"),
@@ -709,6 +712,7 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
     .lean();
   const currentTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-09-01"),
         $lte: new Date("2024-09-31"),
@@ -840,6 +844,7 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
   }
   let previousTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-08-01"),
         $lte: new Date("2024-08-31"),
@@ -849,6 +854,7 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
     .lean();
   let currentTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-09-01"),
         $lte: new Date("2024-09-31"),
@@ -1003,6 +1009,7 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
   }
   let previousTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-08-01"),
         $lte: new Date("2024-08-31"),
@@ -1011,6 +1018,7 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
     .lean();
   let currentTransactions = await transactionModel
     .find({
+      user: req.userId,
       date: {
         $gt: new Date("2024-09-01"),
         $lte: new Date("2024-09-31"),
@@ -1063,8 +1071,9 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
         }
       }
       if (filter == "tag") {
-        if (current.tag?.name) {
-          if (obj[current.tag.name]) obj[current.tag.name] += current.amount;
+        if (current.tag?.tag_name) {
+          if (obj[current.tag.tag_name])
+            obj[current.tag.tag_name] += current.amount;
           else {
             obj[current.tag.tag_name] = current.amount;
             image[current.tag.tag_name] = current.tag?.image;
