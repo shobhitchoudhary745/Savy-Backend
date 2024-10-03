@@ -551,7 +551,6 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
         $gt: new Date("2024-08-01"),
         $lte: new Date("2024-08-31"),
       },
-      direction: "credit",
     })
     .lean();
   const currentTransactions = await transactionModel
@@ -560,7 +559,6 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
         $gt: new Date("2024-09-01"),
         $lte: new Date("2024-09-31"),
       },
-      direction: "credit",
     })
     .populate("category")
     .populate("bucket")
@@ -572,8 +570,14 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
     bucket = {},
     categoryImage = {},
     bucketImage = {};
+  let moneyIn = 0,
+    moneyOut = 0,
+    previousMoneyIn = 0,
+    previousMoneyOut = 0;
 
   for (const transaction of currentTransactions) {
+    if (transaction.direction === "credit") moneyIn += transaction.amount;
+    else moneyOut += Math.abs(transaction.amount);
     if (transaction.category) {
       if (category[transaction.category.name])
         category[transaction.category.name] += Math.abs(transaction.amount);
@@ -617,6 +621,36 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
         ]
       ] = Math.abs(transaction.amount);
   }
+  for (const transaction of previousTransactions) {
+    if (transaction.direction === "credit")
+      previousMoneyIn += transaction.amount;
+    else previousMoneyOut += Math.abs(transaction.amount);
+  }
+
+  overview.MoneyInvsOutData = [
+    { name: "Money In", value: moneyIn },
+    { name: "Money Out", value: moneyOut },
+  ];
+  overview.moneyIn = {};
+  overview.moneyOut = {};
+  overview.moneyIn.graphData = [
+    { name: "Previous Month", value: previousMoneyIn },
+    { name: "Current Month", value: moneyIn },
+  ];
+  overview.moneyIn.percent =
+    moneyIn > previousMoneyIn
+      ? ((moneyIn - previousMoneyIn) * 100) / previousMoneyIn
+      : (((previousMoneyIn - moneyIn) * 100) / previousMoneyIn) * -1;
+
+  overview.moneyOut.graphData = [
+    { name: "Previous Month", value: previousMoneyOut },
+    { name: "Current Month", value: moneyOut },
+  ];
+
+  overview.moneyOut.percent =
+    moneyOut > previousMoneyOut
+      ? ((moneyOut - previousMoneyOut) * 100) / previousMoneyOut
+      : (((previousMoneyOut - moneyOut) * 100) / previousMoneyOut) * -1;
   const arr = [];
   for (let c in category) {
     arr.push({
