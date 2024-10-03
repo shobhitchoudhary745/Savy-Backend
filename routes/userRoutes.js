@@ -35,7 +35,7 @@ router.get("/get-user-connection", getConnection);
 router.get("/get-user-account", auth, getUserAccounts);
 router.post("/get-user-token", getUserToken);
 router.get("/get-graph-data", auth, getGraphData);
-
+router.get("/get-cashflow-data-in", auth, getCashFlowDataIn);
 router.get("/get-cashflow-data-overview", auth, getCashFlowOverview);
 router.get("/get-cashflow-data-out", auth, getCashFlowDataOut);
 router.get("/get-cashflow-data-net", auth, getCashFlowDataNet);
