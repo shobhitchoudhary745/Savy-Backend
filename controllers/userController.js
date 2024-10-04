@@ -821,7 +821,7 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
       });
     arr.push({ name: "Last Period", uv: total1 });
     moneyIn.graphData = arr;
-    moneyIn.data = currentTransactions;
+    moneyIn.data = currentTransactions.slice(0,5);
   }
 
   res.status(200).send({
@@ -971,7 +971,7 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
   }
   if (filter && filter != "transaction") {
     moneyIn.graphData = arr;
-    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent).slice(0,5);
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
   } else {
     let arr = [];
     total2 > total1 &&
@@ -986,7 +986,7 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
       });
     arr.push({ name: "Last Period", uv: total1 });
     moneyIn.graphData = arr;
-    moneyIn.data = currentTransactions;
+    moneyIn.data = currentTransactions.slice(0,5);
   }
 
   res.status(200).send({
@@ -1134,7 +1134,7 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
   }
   if (filter && filter != "transaction") {
     moneyIn.graphData = arr;
-    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent).slice(0,5);
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
   } else {
     let arr = [];
     total2 > total1 &&
@@ -1154,7 +1154,7 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
         ...t,
         amount: t.direction == "credit" ? t.amount : t.amount * -1,
       };
-    });
+    }).slice(0,5);
   }
 
   res.status(200).send({
