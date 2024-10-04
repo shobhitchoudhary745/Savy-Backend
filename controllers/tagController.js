@@ -1,6 +1,7 @@
 const adminModel = require("../models/adminModel");
 const tagsModel = require("../models/tagsModel");
 const catchAsyncError = require("../utils/catchAsyncError");
+const ErrorHandler = require("../utils/errorHandler");
 const { s3Uploadv2 } = require("../utils/s3");
 
 exports.createTag = catchAsyncError(async (req, res, next) => {
