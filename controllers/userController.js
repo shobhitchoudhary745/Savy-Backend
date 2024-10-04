@@ -806,7 +806,7 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
   }
   if (filter && filter != "transaction") {
     moneyIn.graphData = arr;
-    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent).slice(0,5);
   } else {
     let arr = [];
     total2 > total1 &&
@@ -971,7 +971,7 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
   }
   if (filter && filter != "transaction") {
     moneyIn.graphData = arr;
-    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent).slice(0,5);
   } else {
     let arr = [];
     total2 > total1 &&
@@ -1134,7 +1134,7 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
   }
   if (filter && filter != "transaction") {
     moneyIn.graphData = arr;
-    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent);
+    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent).slice(0,5);
   } else {
     let arr = [];
     total2 > total1 &&
