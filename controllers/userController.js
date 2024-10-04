@@ -1176,6 +1176,7 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
   if (tag) transaction.tag = tag;
   if (notes) transaction.notes = notes;
   if (category && bill) {
+    transaction.bill = true;
     await billModel.create({
       category,
       budget_amount: Math.abs(transaction.amount),

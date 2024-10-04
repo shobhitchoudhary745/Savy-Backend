@@ -39,6 +39,9 @@ const Schema = new mongoose.Schema(
     notes: {
       type: String,
     },
+    bill: {
+      type: Boolean,
+    },
   },
   {
     timestamps: true,
