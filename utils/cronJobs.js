@@ -33,6 +33,7 @@ cron.schedule("*/30 * * * *", async () => {
         user: user._id,
         account_id: user.account_id,
       });
+      console.log("str",transactions.data.length)
 
       if (transactionCount < transactions.data.length) {
         const transaction = transactions.data
