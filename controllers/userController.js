@@ -805,8 +805,8 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
     });
   }
   if (filter && filter != "transaction") {
-    moneyIn.graphData = arr;
-    moneyIn.data = arr2.sort((a, b) => a.percent - b.percent).slice(0,5);
+    moneyIn.graphData = arr.sort((a,b)=>b.value-a.value).slice(0,5);
+    moneyIn.data = arr2.sort((a, b) => b.percent - a.percent).slice(0,5);
   } else {
     let arr = [];
     total2 > total1 &&
