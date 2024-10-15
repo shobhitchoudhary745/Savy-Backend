@@ -75,6 +75,12 @@ exports.getBudget = catchAsyncError(async (req, res, next) => {
 exports.updateBudget = catchAsyncError(async (req, res, next) => {
   const budget = await budgetModel.findById(req.params.id);
   if (!budget) return next(new ErrorHandler("Budget Not Found", 404));
+  const { category, budget_amount, payday, date } = req.body;
+  if (category) budget.category = category;
+  if (budget_amount) budget.budget_amount = budget_amount;
+  if (payday) budget.payday = payday;
+  if (date) budget.date = new Date(date);
+  await budget.save();
 
   res.status(200).json({
     success: true,
