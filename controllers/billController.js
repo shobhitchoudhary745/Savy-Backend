@@ -31,6 +31,7 @@ exports.getBills = catchAsyncError(async (req, res, next) => {
   const bills = await billModel
     .find({ user: req.userId })
     .populate("category")
+    .populate("budget")
     .sort({ createdAt: -1 })
     .lean();
   res.status(200).json({
@@ -41,7 +42,11 @@ exports.getBills = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBill = catchAsyncError(async (req, res, next) => {
-  const bill = await billModel.findById(req.params.id).populate("category");
+  const bill = await billModel
+    .findById(req.params.id)
+    .populate("category")
+    .populate("budget")
+    .lean();
   if (!bill) return next(new ErrorHandler("Bill Not Found", 404));
   res.status(200).json({
     success: true,
