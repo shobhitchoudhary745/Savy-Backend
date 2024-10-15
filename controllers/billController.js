@@ -58,10 +58,11 @@ exports.getBill = catchAsyncError(async (req, res, next) => {
 exports.updateBill = catchAsyncError(async (req, res, next) => {
   const bill = await billModel.findById(req.params.id);
   if (!bill) return next(new ErrorHandler("Payday Not Found", 404));
-  const { category, budget, budget_amount } = req.body;
+  const { category, budget, budget_amount, date } = req.body;
   if (category) bill.category = category;
   if (budget) bill.budget = budget;
   if (budget_amount) bill.budget_amount = budget_amount;
+  if (date) bill.date = new Date(date);
   await bill.save();
 
   res.status(200).json({
