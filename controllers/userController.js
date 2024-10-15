@@ -9,6 +9,7 @@ const { generateOtp } = require("../utils/generateCode");
 const { sendEmail } = require("../utils/sendEmail");
 const getToken = require("../utils/getToken");
 const billModel = require("../models/billModel");
+const budgetModel = require("../models/budgetModel");
 const { getTwoMonthRanges } = require("../utils/helper");
 
 const sendData = async (user, statusCode, res, purpose) => {
@@ -481,6 +482,18 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
   }
 
   const graph = [];
+  const [budgets, bills] = await Promise.all([
+    budgetModel
+      .find({ user: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(2)
+      .lean(),
+    billModel
+      .find({ user: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(2)
+      .lean(),
+  ]);
 
   for (let data in obj) {
     const obj1 = {};
@@ -516,6 +529,8 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
     success: true,
     dashboardData: {
       userName,
+      bills,
+      budgets,
       moneyOutGraph: graph,
       card1: {
         "Total amount": totalAmount,
