@@ -487,11 +487,13 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       .find({ user: req.userId })
       .sort({ createdAt: -1 })
       .limit(2)
+      .populate("category")
       .lean(),
     billModel
       .find({ user: req.userId })
       .sort({ createdAt: -1 })
       .limit(2)
+      .populate("category")
       .lean(),
   ]);
 
