@@ -533,7 +533,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       userName,
       bills,
       budgets,
-      moneyOutGraph: graph,
+      moneyOutGraph: graph.sort((a,b)=>b.value-a.value).slice(0,5),
       card1: {
         "Total amount": totalAmount,
         "Credit Card": creditCard,
