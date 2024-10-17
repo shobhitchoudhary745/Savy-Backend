@@ -1,8 +1,12 @@
 const adminModel = require("../models/adminModel");
+const billModel = require("../models/billModel");
 const blogsModel = require("../models/blogsModel");
 const bucketModel = require("../models/bucketModel");
+const budgetModel = require("../models/budgetModel");
 const categoryModel = require("../models/categoryModel");
 const faqModel = require("../models/faqModel");
+const goalModel = require("../models/goalModel");
+const paydayModel = require("../models/payDayModel");
 const queryModel = require("../models/queryModel");
 const testimonialModel = require("../models/testimonialModel");
 const userModel = require("../models/userModel");
@@ -181,6 +185,30 @@ exports.getAllUser = catchAsyncError(async (req, res, next) => {
   res.status(200).send({
     success: true,
     users,
+    message: "User Fetched Successfully",
+  });
+});
+
+exports.getUserDetails = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const user = await userModel.findById(id).lean();
+
+  if (!user) return next(new ErrorHandler("User Not Found", 400));
+  const [bills, budgets, paydays, goals] = await Promise.all([
+    billModel.find({ user: id }).lean(),
+    budgetModel.find({ user: id }).lean(),
+    paydayModel.find({ user: id }).lean(),
+    goalModel.find({ user: id }).lean(),
+  ]);
+  res.status(200).send({
+    success: true,
+    data: {
+      bills,
+      budgets,
+      paydays,
+      goals,
+      profile: { name: user.user_name, email: user.email, mobile: user.mobile },
+    },
     message: "User Fetched Successfully",
   });
 });

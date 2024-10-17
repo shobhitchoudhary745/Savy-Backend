@@ -8,6 +8,7 @@ const {
   getDashboardData,
   updatePassword,
   getAllUser,
+  getUserDetails,
 } = require("../controllers/adminController");
 const { auth, isAdmin } = require("../middlewares/auth");
 const router = express.Router();
@@ -20,6 +21,7 @@ router.post("/reset-password", resetPassword);
 router.get("/get-dashboard-data", auth, isAdmin, getDashboardData);
 router.patch("/update-password", auth, updatePassword);
 router.get("/get-all-users", auth, isAdmin, getAllUser);
+router.get("/get-user-details/:id", auth, isAdmin, getUserDetails);
 
 module.exports = router;
 
