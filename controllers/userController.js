@@ -5,11 +5,13 @@ const API_KEY = process.env.BASIC_API;
 const transactionModel = require("../models/transactionModel");
 
 const userModel = require("../models/userModel");
+const goalModel = require("../models/goalModel");
 const { generateOtp } = require("../utils/generateCode");
 const { sendEmail } = require("../utils/sendEmail");
 const getToken = require("../utils/getToken");
 const billModel = require("../models/billModel");
 const budgetModel = require("../models/budgetModel");
+const paydayModel = require("../models/payDayModel");
 const { getTwoMonthRanges } = require("../utils/helper");
 
 const sendData = async (user, statusCode, res, purpose) => {
@@ -533,7 +535,7 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
       userName,
       bills,
       budgets,
-      moneyOutGraph: graph.sort((a,b)=>b.value-a.value).slice(0,5),
+      moneyOutGraph: graph.sort((a, b) => b.value - a.value).slice(0, 5),
       card1: {
         "Total amount": totalAmount,
         "Credit Card": creditCard,
@@ -553,21 +555,14 @@ exports.getGraphData = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
-  const { date } = req.query;
-  let dateRange;
-  if (date == "last_month") {
-    dateRange = getTwoMonthRanges(1, 2);
-  } else if (date == "last_three_month") {
-    dateRange = getTwoMonthRanges(2, 5);
-  } else if (date == "last_six_month") {
-    dateRange = getTwoMonthRanges(5, 8);
-  }
+  const { currentStart, currentEnd, previousStart, previousEnd } = req.query;
+
   const previousTransactions = await transactionModel
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-08-01"),
-        $lte: new Date("2024-08-31"),
+        $gt: new Date(previousStart),
+        $lte: new Date(previousEnd),
       },
     })
     .lean();
@@ -575,8 +570,8 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-09-01"),
-        $lte: new Date("2024-09-31"),
+        $gt: new Date(currentStart),
+        $lte: new Date(currentEnd),
       },
     })
     .populate("category")
@@ -707,22 +702,15 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
-  const { date, filter } = req.query;
+  const { currentStart, currentEnd, previousStart, previousEnd, filter } =
+    req.query;
   const obj = {};
-  let dateRange;
-  if (date == "last_month") {
-    dateRange = getTwoMonthRanges(1, 2);
-  } else if (date == "last_three_month") {
-    dateRange = getTwoMonthRanges(2, 5);
-  } else if (date == "last_six_month") {
-    dateRange = getTwoMonthRanges(5, 8);
-  }
   const previousTransactions = await transactionModel
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-08-01"),
-        $lte: new Date("2024-08-31"),
+        $gt: new Date(previousStart),
+        $lte: new Date(previousEnd),
       },
       direction: "credit",
     })
@@ -731,8 +719,8 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-09-01"),
-        $lte: new Date("2024-09-31"),
+        $gt: new Date(currentStart),
+        $lte: new Date(currentEnd),
       },
       direction: "credit",
     })
@@ -849,22 +837,17 @@ exports.getCashFlowDataIn = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
-  const { date, filter } = req.query;
+  const { currentStart, currentEnd, previousStart, previousEnd, filter } =
+    req.query;
   const obj = {};
-  let dateRange;
-  if (date == "last_month") {
-    dateRange = getTwoMonthRanges(1, 2);
-  } else if (date == "last_three_month") {
-    dateRange = getTwoMonthRanges(2, 5);
-  } else if (date == "last_six_month") {
-    dateRange = getTwoMonthRanges(5, 8);
-  }
+ 
+ 
   let previousTransactions = await transactionModel
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-08-01"),
-        $lte: new Date("2024-08-31"),
+        $gt: new Date(previousStart),
+        $lte: new Date(previousEnd),
       },
       direction: "debit",
     })
@@ -873,8 +856,8 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-09-01"),
-        $lte: new Date("2024-09-31"),
+        $gt: new Date(currentStart),
+        $lte: new Date(currentEnd),
       },
       direction: "debit",
     })
@@ -1014,22 +997,16 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
-  const { date, filter } = req.query;
+  const { currentStart, currentEnd, previousStart, previousEnd, filter } =
+  req.query;
   const obj = {};
-  let dateRange;
-  if (date == "last_month") {
-    dateRange = getTwoMonthRanges(1, 2);
-  } else if (date == "last_three_month") {
-    dateRange = getTwoMonthRanges(2, 5);
-  } else if (date == "last_six_month") {
-    dateRange = getTwoMonthRanges(5, 8);
-  }
+  
   let previousTransactions = await transactionModel
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-08-01"),
-        $lte: new Date("2024-08-31"),
+        $gt: new Date(previousStart),
+        $lte: new Date(previousEnd),
       },
     })
     .lean();
@@ -1037,8 +1014,8 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
     .find({
       user: req.userId,
       date: {
-        $gt: new Date("2024-09-01"),
-        $lte: new Date("2024-09-31"),
+        $gt: new Date(currentStart),
+        $lte: new Date(currentEnd),
       },
     })
     .sort({ amount: 1 })
@@ -1266,4 +1243,28 @@ exports.getTransaction = catchAsyncError(async (req, res, next) => {
     message: "Transaction Fetched Successfully",
     transaction,
   });
+});
+
+exports.getGoalConsensus = catchAsyncError(async (req, res, next) => {
+  const goals = await goalModel
+    .find({
+      date: {
+        $gte: new Date(),
+      },
+      user: req.userId,
+    })
+    .sort({ date: 1 })
+    .lean();
+
+  const bills = await billModel
+    .find({
+      user: req.userId,
+      date: {
+        $gte: new Date(),
+      },
+    })
+    .sort({ date: 1 })
+    .lean();
+  const budgets = await budgetModel.find({ user: req.userId });
+  const paydays = await paydayModel.find({ user: req.userId });
 });
