@@ -212,3 +212,4 @@ exports.getUserDetails = catchAsyncError(async (req, res, next) => {
     message: "User Fetched Successfully",
   });
 });
+ 
