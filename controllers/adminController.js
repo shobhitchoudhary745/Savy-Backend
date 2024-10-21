@@ -195,8 +195,8 @@ exports.getUserDetails = catchAsyncError(async (req, res, next) => {
 
   if (!user) return next(new ErrorHandler("User Not Found", 400));
   const [bills, budgets, paydays, goals] = await Promise.all([
-    billModel.find({ user: id }).lean(),
-    budgetModel.find({ user: id }).lean(),
+    billModel.find({ user: id }).populate("category").lean(),
+    budgetModel.find({ user: id }).populate("category").lean(),
     paydayModel.find({ user: id }).lean(),
     goalModel.find({ user: id }).lean(),
   ]);
