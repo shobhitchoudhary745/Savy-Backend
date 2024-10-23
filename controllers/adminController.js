@@ -11,7 +11,7 @@ const queryModel = require("../models/queryModel");
 const testimonialModel = require("../models/testimonialModel");
 const userModel = require("../models/userModel");
 const catchAsyncError = require("../utils/catchAsyncError");
-const ErrorHandler = require("../utils/errorHandler");
+const ErrorHandler = require("../utils/errorHandler"); 
 const { sendEmail } = require("../utils/sendEmail");
 
 exports.registerAdmin = catchAsyncError(async (req, res, next) => {
