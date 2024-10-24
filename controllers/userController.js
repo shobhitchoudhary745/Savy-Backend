@@ -1233,13 +1233,14 @@ exports.getTransaction = catchAsyncError(async (req, res, next) => {
     user: req.userId,
     account_id: user.account_id,
     description: transaction.description,
-  });
+  }).lean();
   for (let t of transactions) {
     total += Math.abs(t.amount);
   }
   transaction.total = transactions.length;
   transaction.spend = total;
   transaction.average = Math.round(total / transactions.length);
+  transaction.history = transactions;
   res.status(200).json({
     success: true,
     message: "Transaction Fetched Successfully",
