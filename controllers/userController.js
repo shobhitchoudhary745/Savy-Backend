@@ -1288,7 +1288,7 @@ exports.getAllData = catchAsyncError(async (req, res, next) => {
 
   const category = {},
     bucket = {},
-    categoryImage = {},
+    categoryImage = {}, 
     bucketImage = {},
     merchant = {};
 
