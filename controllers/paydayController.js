@@ -27,9 +27,13 @@ exports.getPaydays = catchAsyncError(async (req, res, next) => {
     .find({ user: req.userId })
     .sort({ createdAt: -1 })
     .lean();
+  let total = paydays.reduce((pre, pay) => {
+    return pre + pay.amount;
+  }, 0);
   res.status(200).json({
     success: true,
     paydays,
+    total,
     message: "Paydays fetched Successfully",
   });
 });

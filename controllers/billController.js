@@ -34,9 +34,13 @@ exports.getBills = catchAsyncError(async (req, res, next) => {
     .populate("budget")
     .sort({ createdAt: -1 })
     .lean();
+  let total = bills.reduce((pre, bill) => {
+    return pre + bill.budget_amount;
+  }, 0);
   res.status(200).json({
     success: true,
     bills,
+    total,
     message: "Bills fetched Successfully",
   });
 });

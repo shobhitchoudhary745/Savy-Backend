@@ -46,9 +46,13 @@ exports.getBudgets = catchAsyncError(async (req, res, next) => {
     })
     .sort({ createdAt: -1 })
     .lean();
+  let total = budgets.reduce((pre, budget) => {
+    return pre + budget.budget_amount;
+  }, 0);
   res.status(200).json({
     success: true,
     budgets,
+    total,
     message: "Budgets fetched Successfully",
   });
 });
