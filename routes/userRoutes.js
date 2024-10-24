@@ -20,6 +20,7 @@ const {
   getCashFlowDataOut,
   getCashFlowDataNet,
   getCashFlowOverview,
+  getAllData,
 } = require("../controllers/userController");
 const { upload } = require("../utils/s3");
 const router = express.Router();
@@ -42,5 +43,6 @@ router.get("/get-cashflow-data-net", auth, getCashFlowDataNet);
 router.patch("/update-transaction/:id", auth, updateTransaction);
 router.get("/get-transactions", auth, getTransactions);
 router.get("/get-transaction/:id", auth, getTransaction);
+router.get("/get-all-list", auth, getAllData);
 
 module.exports = router;

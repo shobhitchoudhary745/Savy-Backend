@@ -641,6 +641,9 @@ exports.getCashFlowOverview = catchAsyncError(async (req, res, next) => {
     else previousMoneyOut += Math.abs(transaction.amount);
   }
 
+  overview.text = moneyIn > moneyOut ? "Leftover" : "Overspent";
+  overview.amount = Math.abs(moneyIn - moneyOut);
+
   overview.MoneyInvsOutData = [
     { name: "Money In", uv: moneyIn },
     { name: "Money Out", uv: moneyOut },
@@ -840,8 +843,7 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
   const { currentStart, currentEnd, previousStart, previousEnd, filter } =
     req.query;
   const obj = {};
- 
- 
+
   let previousTransactions = await transactionModel
     .find({
       user: req.userId,
@@ -998,9 +1000,9 @@ exports.getCashFlowDataOut = catchAsyncError(async (req, res, next) => {
 
 exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
   const { currentStart, currentEnd, previousStart, previousEnd, filter } =
-  req.query;
+    req.query;
   const obj = {};
-  
+
   let previousTransactions = await transactionModel
     .find({
       user: req.userId,
@@ -1267,4 +1269,104 @@ exports.getGoalConsensus = catchAsyncError(async (req, res, next) => {
     .lean();
   const budgets = await budgetModel.find({ user: req.userId });
   const paydays = await paydayModel.find({ user: req.userId });
+});
+
+exports.getAllData = catchAsyncError(async (req, res, next) => {
+  const { currentStart, currentEnd, from } = req.query;
+  const currentTransactions = await transactionModel
+    .find({
+      user: req.userId,
+      date: {
+        $gt: new Date(currentStart),
+        $lte: new Date(currentEnd),
+      },
+    })
+    .populate("category")
+    .populate("bucket")
+    .populate("tag")
+    .lean();
+  console.log(currentTransactions)
+  const category = {},
+    bucket = {},
+    categoryImage = {},
+    bucketImage = {},
+    merchant = {};
+
+  for (const transaction of currentTransactions) {
+    if (transaction.category) {
+      if (category[transaction.category.name])
+        category[transaction.category.name] += Math.abs(transaction.amount);
+      else {
+        category[transaction.category.name] = Math.abs(transaction.amount);
+        categoryImage[transaction.category.name] = transaction.category.image;
+      }
+    } else {
+      if (category.others) category.others += Math.abs(transaction.amount);
+      else category.others = Math.abs(transaction.amount);
+    }
+
+    if (transaction.bucket) {
+      if (bucket[transaction.bucket.name])
+        bucket[transaction.bucket.name] += Math.abs(transaction.amount);
+      else {
+        bucket[transaction.bucket.name] = Math.abs(transaction.amount);
+        bucketImage[transaction.bucket.name] = transaction.bucket.image;
+      }
+    } else {
+      if (bucket.others) bucket.others += Math.abs(transaction.amount);
+      else bucket.others = Math.abs(transaction.amount);
+    }
+
+    if (
+      merchant[
+        transaction.description.split("-")[
+          transaction.description.split("-").length - 1
+        ]
+      ]
+    )
+      merchant[
+        transaction.description.split("-")[
+          transaction.description.split("-").length - 1
+        ]
+      ] += Math.abs(transaction.amount);
+    else
+      merchant[
+        transaction.description.split("-")[
+          transaction.description.split("-").length - 1
+        ]
+      ] = Math.abs(transaction.amount);
+  }
+
+  const arr = [];
+  for (let c in category) {
+    arr.push({
+      category: c,
+      value: category[c],
+      image: categoryImage[c] || "",
+    });
+  }
+  const arr2 = [];
+  for (let c in merchant) {
+    arr2.push({ merchant: c, value: merchant[c] });
+  }
+
+  const arr3 = [];
+  for (let c in bucket) {
+    arr3.push({ bucket: c, value: bucket[c], image: bucketImage[c] || "" });
+  }
+
+  let data = [];
+
+  if (from == "category") data = arr.sort((a, b) => b.value - a.value);
+  if (from == "bucket") data = arr3.sort((a, b) => b.value - a.value);
+  if (from == "merchant") data = arr2.sort((a, b) => b.value - a.value);
+  if (from == "transaction")
+    data = currentTransactions
+      .map((tran) => {
+        return { ...tran, amount: Math.abs(tran.amount) };
+      })
+      .sort((a, b) => b.amount - a.amount);
+  res
+    .status(200)
+    .json({ data, success: true, message: "Data Fetched Successfully" });
 });
