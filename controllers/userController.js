@@ -1285,7 +1285,7 @@ exports.getAllData = catchAsyncError(async (req, res, next) => {
     .populate("bucket")
     .populate("tag")
     .lean();
-  console.log(currentTransactions)
+
   const category = {},
     bucket = {},
     categoryImage = {},
