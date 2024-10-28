@@ -1025,11 +1025,19 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
     .populate("bucket")
     .populate("tag")
     .lean();
+  let currentIn = 0,
+    currentOut = 0,
+    previousIn = 0,
+    previousOut = 0;
 
   previousTransactions = previousTransactions.map((tran) => {
+    if (tran.amount > 0) previousIn += tran.amount;
+    else previousOut += tran.amount;
     return { ...tran, amount: Math.abs(tran.amount) };
   });
   currentTransactions = currentTransactions.map((tran) => {
+    if (tran.amount > 0) currentIn += tran.amount;
+    else currentOut += tran.amount;
     return { ...tran, amount: Math.abs(tran.amount) };
   });
 
@@ -1132,18 +1140,13 @@ exports.getCashFlowDataNet = catchAsyncError(async (req, res, next) => {
     moneyIn.graphData = arr.sort((a, b) => b.value - a.value).slice(0, 5);
     moneyIn.data = arr2.sort((a, b) => b.percent - a.percent).slice(0, 5);
   } else {
-    let arr = [];
-    total2 > total1 &&
-      arr.push({
-        name: "More than Last Period",
-        uv: Math.abs(total2 - total1),
-      });
-    total2 < total1 &&
-      arr.push({
-        name: "Less than Last Period",
-        uv: Math.abs(total2 - total1),
-      });
-    arr.push({ name: "Last Period", uv: total1 });
+    let arr = [
+      { uv: previousIn },
+      { uv: previousOut },
+      { uv: currentIn },
+      { uv: currentOut },
+    ];
+
     moneyIn.graphData = arr;
     moneyIn.data = currentTransactions
       .map((t) => {
@@ -1229,11 +1232,13 @@ exports.getTransaction = catchAsyncError(async (req, res, next) => {
     .populate("bucket")
     .lean();
   let total = 0;
-  const transactions = await transactionModel.find({
-    user: req.userId,
-    account_id: user.account_id,
-    description: transaction.description,
-  }).lean();
+  const transactions = await transactionModel
+    .find({
+      user: req.userId,
+      account_id: user.account_id,
+      description: transaction.description,
+    })
+    .lean();
   for (let t of transactions) {
     total += Math.abs(t.amount);
   }
@@ -1289,7 +1294,7 @@ exports.getAllData = catchAsyncError(async (req, res, next) => {
 
   const category = {},
     bucket = {},
-    categoryImage = {}, 
+    categoryImage = {},
     bucketImage = {},
     merchant = {};
 
