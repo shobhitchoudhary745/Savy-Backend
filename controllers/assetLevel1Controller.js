@@ -1,12 +1,11 @@
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
-const assetModel = require("../models/assetsModel");
+const assetModelLevel1 = require("../models/assetLevel1Model");
 const { s3Uploadv2 } = require("../utils/s3");
-const assetLevel1Model = require("../models/assetLevel1Model");
 
-exports.createAsset = catchAsyncError(async (req, res, next) => {
-  const { title, type } = req.body;
-  if (!title || !type) {
+exports.createAssetLevel1 = catchAsyncError(async (req, res, next) => {
+  const { title, asset_liabilty_ref } = req.body;
+  if (!title || !asset_liabilty_ref) {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
   let location = "";
@@ -16,10 +15,10 @@ exports.createAsset = catchAsyncError(async (req, res, next) => {
   } else {
     return next(new ErrorHandler("All Fieleds are required", 400));
   }
-  const asset = await assetModel.create({
+  const asset = await assetModelLevel1.create({
     title,
-    type,
     image_url: location,
+    asset_liabilty_ref,
   });
   res.status(201).json({
     success: true,
@@ -28,17 +27,15 @@ exports.createAsset = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.getAssets = catchAsyncError(async (req, res, next) => {
-  const { type } = req.query;
+exports.getAssetsLevel1 = catchAsyncError(async (req, res, next) => {
+  const { asset_ref } = req.query;
   const query = {};
-  if (type) query.type = type;
-  const assets = await assetModel.find(query).sort({ createdAt: -1 }).lean();
-  for (const asset of assets) {
-    const assetlevel1 = await assetLevel1Model.countDocuments({
-      asset_liabilty_ref: asset._id,
-    });
-    asset.assetlevel1Count = assetlevel1;
-  }
+  if (asset_ref) query.asset_liabilty_ref = asset_ref;
+  const assets = await assetModelLevel1
+    .find(query)
+    .sort({ createdAt: -1 })
+    .populate("asset_liabilty_ref")
+    .lean();
   res.status(200).json({
     success: true,
     assets,
@@ -46,8 +43,8 @@ exports.getAssets = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.getAsset = catchAsyncError(async (req, res, next) => {
-  const asset = await assetModel.findById(req.params.id);
+exports.getAssetLevel1 = catchAsyncError(async (req, res, next) => {
+  const asset = await assetModelLevel1.findById(req.params.id);
   if (!asset) return next(new ErrorHandler("Asset/Liability Not Found", 404));
   res.status(200).json({
     success: true,
@@ -56,10 +53,10 @@ exports.getAsset = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.updateAsset = catchAsyncError(async (req, res, next) => {
-  const asset = await assetModel.findById(req.params.id);
+exports.updateAssetLevel1 = catchAsyncError(async (req, res, next) => {
+  const asset = await assetModelLevel1.findById(req.params.id);
   if (!asset) return next(new ErrorHandler("Asset/Liability Not Found", 404));
-  const { title, type } = req.body;
+  const { title, asset_liabilty_ref } = req.body;
 
   let location = "";
   if (req.file) {
@@ -68,7 +65,7 @@ exports.updateAsset = catchAsyncError(async (req, res, next) => {
   }
 
   if (title) asset.title = title;
-  if (type) asset.type = type;
+  if (asset_liabilty_ref) asset.asset_liabilty_ref = asset_liabilty_ref;
   if (location) asset.image_url = location;
   await asset.save();
 
@@ -79,8 +76,8 @@ exports.updateAsset = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.deleteAsset = catchAsyncError(async (req, res, next) => {
-  const asset = await assetModel.findByIdAndDelete(req.params.id);
+exports.deleteAssetLevel1 = catchAsyncError(async (req, res, next) => {
+  const asset = await assetModelLevel1.findByIdAndDelete(req.params.id);
   if (!asset) return next(new ErrorHandler("Asset/Liability Not Found", 404));
   res.status(200).json({
     success: true,

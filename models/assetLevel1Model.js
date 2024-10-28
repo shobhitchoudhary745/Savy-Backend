@@ -8,10 +8,6 @@ const Schema = new mongoose.Schema(
     image: {
       type: String,
     },
-    type: {
-      type: String,
-      enum: ["Asset", "Liability"],
-    },
     asset_liabilty_ref: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AssetLiability",
