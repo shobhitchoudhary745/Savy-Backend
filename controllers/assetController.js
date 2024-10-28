@@ -2,6 +2,7 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const assetModel = require("../models/assetsModel");
 const { s3Uploadv2 } = require("../utils/s3");
+const assetLevel1Model = require("../models/assetLevel1Model");
 
 exports.createAsset = catchAsyncError(async (req, res, next) => {
   const { title, type } = req.body;
@@ -29,6 +30,12 @@ exports.createAsset = catchAsyncError(async (req, res, next) => {
 
 exports.getAssets = catchAsyncError(async (req, res, next) => {
   const assets = await assetModel.find().sort({ createdAt: -1 }).lean();
+  for (const asset of assets) {
+    const assetlevel1 = await assetLevel1Model.countDocuments({
+      asset_liabilty_ref: asset._id,
+    });
+    asset.assetlevel1Count = assetlevel1;
+  }
   res.status(200).json({
     success: true,
     assets,
