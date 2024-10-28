@@ -44,6 +44,7 @@ const pageRoutes = require("./routes/pageRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const assetRoutes = require("./routes/assetRoutes");
 const assetLevel1Routes = require("./routes/asset1Routes");
+const assetLevel2Routes = require("./routes/asset2Routes");
 const userModel = require("./models/userModel");
 const axios = require("axios");
 const transactionModel = require("./models/transactionModel");
@@ -66,6 +67,7 @@ app.use("/api/page", pageRoutes);
 app.use("/api/tag", tagRoutes);
 app.use("/api/asset", assetRoutes);
 app.use("/api/asset-level1", assetLevel1Routes);
+app.use("/api/asset-level2", assetLevel2Routes);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
@@ -173,4 +175,3 @@ app.all("*", (req, res, next) => {
 module.exports = app;
 
 app.use(error);
-
