@@ -19,7 +19,7 @@ exports.createAsset = catchAsyncError(async (req, res, next) => {
   const asset = await assetModel.create({
     title,
     type,
-    image_url: location,
+    image: location,
   });
   res.status(201).json({
     success: true,
@@ -69,7 +69,7 @@ exports.updateAsset = catchAsyncError(async (req, res, next) => {
 
   if (title) asset.title = title;
   if (type) asset.type = type;
-  if (location) asset.image_url = location;
+  if (location) asset.image = location;
   await asset.save();
 
   res.status(200).json({
