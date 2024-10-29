@@ -17,7 +17,7 @@ exports.createAssetLevel2 = catchAsyncError(async (req, res, next) => {
   }
   const asset = await assetModelLevel2.create({
     title,
-    image_url: location,
+    image: location,
     asset_level1_ref,
   });
   res.status(201).json({
@@ -66,7 +66,7 @@ exports.updateAssetLevel2 = catchAsyncError(async (req, res, next) => {
 
   if (title) asset.title = title;
   if (asset_level1_ref) asset.asset_level1_ref = asset_level1_ref;
-  if (location) asset.image_url = location;
+  if (location) asset.image = location;
   await asset.save();
 
   res.status(200).json({
